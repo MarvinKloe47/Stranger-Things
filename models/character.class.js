@@ -1,63 +1,98 @@
-class Character extends MovableObjects 
-{
-
-    IMAGES_WALKING = [
-        "img/2_character_will/2_walk/W-23.png",
-        "img/2_character_will/2_walk/W-24.png",
-        "img/2_character_will/2_walk/W-25.png",
-        "img/2_character_will/2_walk/W-26.png",
-        "img/2_character_will/2_walk/W-27.png",
-    ];
+class Character extends MovableObjects {
 
     world;
-    currentImageIndex = 0;
+    // Bewegung
     speed = 10;
 
+    // SpriteSheet
+    SPRITE_WALK = "img/2_character_will/2_walk/Walk.png";
+    frameCount = 8;
+    currentFrame = 0;
+    frameInterval = 100;
+    lastFrameTime = 0;
 
-
-    constructor()
-    {
+    constructor() {
         super();
-        this.loadImage("img/2_character_will/2_walk/W-23.png");
-        this.loadImages(this.IMAGES_WALKING);
+        this.loadImage(this.SPRITE_WALK);
         this.setSize(130, 220);
         this.alignToGround();
         this.animate();
     }
 
     animate() {
-        setInterval(() => {
-       if (this.world && this.world.keyboard && this.world.keyboard.RIGHT) {
-            this.x += this.speed;
-            this.otherDirection = false;
-        }
-        if (this.world && this.world.keyboard && this.world.keyboard.LEFT) {
-            this.x -= this.speed;
-            this.otherDirection = true;
-        }
-        this.world.camera_x = -this.x;
-    }, 1000 / 30);
 
-        //Walk animation 
+        // Bewegung + Kamera
         setInterval(() => {
-        const isMoving = this.world && this.world.keyboard &&
-            (this.world.keyboard.RIGHT || this.world.keyboard.LEFT);
+            if (this.world?.keyboard?.RIGHT && this.x < (this.world?.level?.level_end_x ?? Infinity)) {
+                this.x += this.speed;
+                this.otherDirection = false;
+            }
 
-        if (isMoving) {
-            let i = this.currentImageIndex % this.IMAGES_WALKING.length;
-            let path = this.IMAGES_WALKING[i]; 
-            this.img = this.imageCache[path];
-            this.currentImageIndex++;
-        } else {
-            this.img = this.imageCache[this.IMAGES_WALKING[0]];
-            this.currentImageIndex = 0;
-        }
-        }, 100);
-        
+            if (this.world?.keyboard?.LEFT && this.x > 0) {
+                this.x -= this.speed;
+                this.otherDirection = true;
+            }
+
+            this.world.camera_x = -this.x;
+        }, 1000 / 30);
+
+        // Laufanimation (Frames wechseln)
+        setInterval(() => {
+            const isMoving = this.world?.keyboard &&
+                (this.world.keyboard.RIGHT || this.world.keyboard.LEFT);
+
+            if (isMoving) {
+                this.currentFrame = (this.currentFrame + 1) % this.frameCount;
+            } else {
+                this.currentFrame = 0;
+            }
+        }, this.frameInterval);
     }
 
-    jump() 
-    {
+    draw(ctx) {
+        if (!this.img || !this.img.complete || this.img.naturalWidth === 0) return;
 
+        const frameWidth = this.img.width / this.frameCount;
+        const frameHeight = this.img.height;
+
+        if (!frameWidth || !frameHeight) return;
+
+        ctx.save();
+
+        if (this.otherDirection) {
+            // Spiegeln nach links
+            ctx.translate(this.x + this.width, this.y);
+            ctx.scale(-1, 1);
+
+            ctx.drawImage(
+                this.img,
+                this.currentFrame * frameWidth,
+                0,
+                frameWidth,
+                frameHeight,
+                0,
+                0,
+                this.width,
+                this.height
+            );
+        } else {
+            ctx.drawImage(
+                this.img,
+                this.currentFrame * frameWidth,
+                0,
+                frameWidth,
+                frameHeight,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        }
+
+        ctx.restore();
+    }
+
+    jump() {
+        // später
     }
 }

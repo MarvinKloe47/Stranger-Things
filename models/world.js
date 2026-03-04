@@ -6,35 +6,30 @@ class World {
         this.worldHeight = this.ctx.canvas.height;
         this.groundY = this.worldHeight - 20;
 
+        
         this.character = new Character();
-        this.enemies = [
-            new demogorgon(this.worldWidth + 80),
-            new demogorgon(this.worldWidth + 320),
-            new demogorgon(this.worldWidth + 560),
-        ];
-        this.clouds = [
-            new Cloud(this.worldWidth),
-        ];
-        this.backgroundObjects = [
-            new BackgroundObject("img/5_background/layers/layer3.png", -720, 0, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer2.png", -720, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer1.png", -720, 80, this.worldWidth, this.worldHeight),
+        this.level = level1;
+        this.enemies = this.level.enemies;
+        this.clouds = this.level.clouds;  
 
-            new BackgroundObject("img/5_background/layers/layer3.png", 0, 0, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer2.png", 0, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer1.png", 0, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer3.png", 720, 0, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer2.png", 720, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer1.png", 720, 80, this.worldWidth, this.worldHeight),
-
-            new BackgroundObject("img/5_background/layers/layer3.png", 720*2, 0, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer2.png", 720*2, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer1.png", 720*2, 80, this.worldWidth, this.worldHeight),
-
-            new BackgroundObject("img/5_background/layers/layer3.png", 720*3, 0, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer2.png", 720*3, 80, this.worldWidth, this.worldHeight),
-            new BackgroundObject("img/5_background/layers/layer1.png", 720*3, 80, this.worldWidth, this.worldHeight),
+        const brightLayers = [
+            { path: "img/5_background/bright/Sky.png", y: 0 },
+            { path: "img/5_background/bright/City2.png", y: 0 },
+            { path: "img/5_background/bright/back.png", y: 0 },
+            { path: "img/5_background/bright/houses1.png", y: 0 },
+            { path: "img/5_background/bright/houses3.png", y: 0 },
+            { path: "img/5_background/bright/minishop&callbox.png", y: 0 },
+            { path: "img/5_background/bright/road&lamps.png", y: 0 },
         ];
+        this.backgroundObjects = [];
+        for (let i = -1; i <= 3; i++) {
+            const x = i * this.worldWidth;
+            brightLayers.forEach((layer) => {
+                this.backgroundObjects.push(
+                    new BackgroundObject(layer.path, x, layer.y, this.worldWidth, this.worldHeight)
+                );
+            });
+        }
 
         this.camera_x = 0;
         this.character.alignToGround(this.groundY);
@@ -69,6 +64,13 @@ class World {
     }
 
     addToMap(mo) {
+        // If an object provides its own draw(ctx) (e.g. SpriteSheet rendering), use it.
+        // This allows SpriteSheets (like Walk.png) to be rendered frame-by-frame.
+        if (typeof mo.draw === 'function') {
+            mo.draw(this.ctx);
+            return;
+        }
+
         if (mo.otherDirection) {
             this.ctx.save();
             this.ctx.translate(mo.x + mo.width / 2, 0);

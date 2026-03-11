@@ -5,20 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stranger Things</title>
     <link rel="stylesheet" href="style.css">
+    <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-objects.class.js"></script>
     <script src="models/character.class.js"></script>
     <script src="models/demogorgon.class.js"></script>
+    <script src="models/orc.class.js"></script>
     <script src="models/cloud.class.js"></script>
     <script src="models/background-object.class.js"></script>
+    <script src="models/coin.class.js"></script>
+    <script src="models/coin-counter.class.js"></script>
+    <script src="models/status-bar.class.js"></script>
+    <script src="models/audio-manager.class.js"></script>
     <script src="models/keyboard.class.js"></script>    
     <script src="models/world.js"></script>
     <script src="models/level.class.js"></script>
+    <script src="models/endboss.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
 </head>
 <body onload="init()">
     <h1>Stranger Things by Marvin und Quentin</h1>
 
-    <canvas id="canvas" width="720" height="480"></canvas>
+    <div class="game-stage">
+        <canvas id="canvas" width="720" height="480"></canvas>
+
+        <div id="start-screen" class="start-screen">
+            <img
+                class="start-screen__bg"
+                src="img/7_ProjectIMG/start-screen.png"
+                alt="Start screen"
+            >
+
+            <div class="start-screen__buttons">
+                <button id="play-button" class="menu-button menu-button--play" type="button" aria-label="Start game">
+                    <img src="img/7_ProjectIMG/play.png" alt="Play">
+                </button>
+                <button id="music-button" class="menu-button" type="button" aria-label="Music on">
+                    <img id="music-button-icon" src="img/7_ProjectIMG/misic.png" alt="Music">
+                </button>
+                <button id="control-button" class="menu-button" type="button" aria-label="Show controls">
+                    <img src="img/7_ProjectIMG/control.png" alt="Controls">
+                </button>
+                <button id="info-button" class="menu-button" type="button" aria-label="Show info">
+                    <img src="img/7_ProjectIMG/about.png" alt="Info">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal__backdrop" data-close-modal="true"></div>
+        <div class="modal__panel">
+            <button class="modal__close" type="button" data-close-modal="true" aria-label="Close info">X</button>
+            <img src="img/7_ProjectIMG/about.png" alt="Info">
+        </div>
+    </div>
+
+    <div id="controls-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal__backdrop" data-close-modal="true"></div>
+        <div class="modal__panel">
+            <button class="modal__close" type="button" data-close-modal="true" aria-label="Close controls">X</button>
+            <img src="img/7_ProjectIMG/Control Menu.png" alt="Controls">
+        </div>
+    </div>
+
+    <div id="end-screen" class="end-screen hidden" aria-hidden="true">
+        <div class="end-screen__backdrop"></div>
+        <div class="end-screen__content">
+            <img id="end-screen-image" class="end-screen__image" src="" alt="Game result">
+            <div class="end-screen__buttons">
+                <button id="restart-button" class="menu-button" type="button" aria-label="Restart game">
+                    <img src="img/7_ProjectIMG/restart.png" alt="Restart">
+                </button>
+                <button id="menu-button" class="menu-button" type="button" aria-label="Back to main menu">
+                    <img src="img/7_ProjectIMG/menu.png" alt="Main menu">
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

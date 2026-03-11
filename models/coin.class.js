@@ -1,0 +1,33 @@
+class Coin extends DrawableObject {
+    IMAGES = [
+        "img/8_collectables/coin_1.png",
+        "img/8_collectables/coin_2.png",
+    ];
+
+    offset = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20,
+    };
+
+    constructor(x, y) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.width = 72;
+        this.height = 72;
+        this.loadImage(this.IMAGES[0]);
+        this.loadImages(this.IMAGES);
+        this.animate();
+    }
+
+    animate() {
+        setInterval(() => {
+            const imageIndex = this.currentImageIndex % this.IMAGES.length;
+            const path = this.IMAGES[imageIndex];
+            this.img = this.imageCache[path];
+            this.currentImageIndex++;
+        }, 250);
+    }
+}

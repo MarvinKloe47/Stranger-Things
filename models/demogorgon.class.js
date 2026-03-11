@@ -1,5 +1,11 @@
 class demogorgon extends MovableObjects 
 {
+    offset = {
+        top: 24,
+        right: 58,
+        bottom: 16,
+        left: 58,
+    };
     IMAGES_WALKING = [
         "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png",
         "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_002.png",
@@ -12,18 +18,17 @@ class demogorgon extends MovableObjects
         "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
         ];
 
-    
-    constructor() {
-    super();
-    this.loadImage("img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
-    this.loadImages(this.IMAGES_WALKING);
-    this.setSize(170, 200);
-    this.x = 350 + Math.random() * 600;
-    this.speed = 0.15 + Math.random() * 0.5;
-    this.otherDirection = true; 
-    this.alignToGround();
-    this.animate();
-}
+    constructor(x = 700) {
+        super();
+        this.loadImage("img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
+        this.loadImages(this.IMAGES_WALKING);
+        this.setSize(170, 200);
+        this.x = x;
+        this.speed = 0.18 + Math.random() * 0.35;
+        this.otherDirection = true;
+        this.alignToGround();
+        this.animate();
+    }
 
 
      animate() {

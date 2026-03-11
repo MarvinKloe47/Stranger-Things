@@ -15,6 +15,7 @@
     <script src="models/coin.class.js"></script>
     <script src="models/coin-counter.class.js"></script>
     <script src="models/status-bar.class.js"></script>
+    <script src="models/boss-status-bar.class.js"></script>
     <script src="models/audio-manager.class.js"></script>
     <script src="models/keyboard.class.js"></script>    
     <script src="models/world.js"></script>
@@ -39,6 +40,9 @@
             <div class="start-screen__buttons">
                 <button id="play-button" class="menu-button menu-button--play" type="button" aria-label="Start game">
                     <img src="img/7_ProjectIMG/play.png" alt="Play">
+                </button>
+                <button id="shop-button" class="menu-button" type="button" aria-label="Open shop">
+                    <img src="img/9_shop/shop-btn.png" alt="Shop">
                 </button>
                 <button id="music-button" class="menu-button" type="button" aria-label="Music on">
                     <img id="music-button-icon" src="img/7_ProjectIMG/misic.png" alt="Music">
@@ -66,6 +70,37 @@
         <div class="modal__panel">
             <button class="modal__close" type="button" data-close-modal="true" aria-label="Close controls">X</button>
             <img src="img/7_ProjectIMG/Control Menu.png" alt="Controls">
+        </div>
+    </div>
+
+    <div id="shop-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal__backdrop" data-close-modal="true"></div>
+        <div class="modal__panel modal__panel--shop">
+            <button class="modal__close" type="button" data-close-modal="true" aria-label="Close shop">X</button>
+            <img class="shop-modal__bg" src="img/9_shop/shop.png" alt="Upgrade shop">
+            <div class="shop-modal__coins">
+                <img src="img/8_collectables/coin_1.png" alt="" aria-hidden="true">
+                <span id="shop-coins-value">0</span>
+            </div>
+            <div class="shop-modal__item">
+                <div class="shop-modal__item-copy">
+                    <div class="shop-modal__title-row">
+                        <img class="shop-modal__skill-icon" src="img/9_shop/Icon_03.png" alt="">
+                        <div>
+                            <h2>Special Attack</h2>
+                            <p>Press S to fire a charged attack with cooldown.</p>
+                        </div>
+                    </div>
+                    <p class="shop-modal__price">Price: 300 Coins</p>
+                </div>
+                <div class="shop-modal__actions">
+                    <button id="buy-special-button" class="shop-buy-button" type="button">Buy Upgrade</button>
+                    <p id="shop-special-message" class="shop-modal__message" aria-live="polite"></p>
+                </div>
+            </div>
+            <div id="shop-unlocked-banner" class="shop-modal__unlocked hidden" aria-hidden="true">
+                <span>Special unlocked</span>
+            </div>
         </div>
     </div>
 

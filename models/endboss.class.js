@@ -82,15 +82,19 @@ class Endboss extends MovableObjects {
     isAttacking = false;
     isHurt = false;
     isDead = false;
+    isRecovering = false;
     deadAnimationFinished = false;
     currentAnimation = 'idle';
     lastAttackTime = 0;
     lastPlayerAttackTime = 0;
     energy = 100;
-    attackCooldown = 1800;
-    attackDuration = 900;
-    attackRange = 150;
-    hurtDuration = 400;
+    attackCooldown = 2600;
+    attackDuration = 650;
+    attackRange = 120;
+    chaseRange = 230;
+    retreatRange = 135;
+    recoveryDuration = 950;
+    hurtDuration = 500;
     animationInterval = 140;
 
     constructor(x = 2000) {
@@ -160,14 +164,27 @@ class Endboss extends MovableObjects {
         if (!this.isActivated || this.isAwakening || this.isDead || this.isHurt) return;
 
         const distanceToCharacter = character.x - this.x;
+        const absoluteDistance = Math.abs(distanceToCharacter);
         this.otherDirection = distanceToCharacter < 0;
 
         if (this.isAttacking) return;
 
-        if (Math.abs(distanceToCharacter) <= this.attackRange && this.canAttack()) {
+        if (this.isRecovering) {
+            this.repositionAfterAttack(distanceToCharacter);
+            return;
+        }
+
+        if (absoluteDistance <= this.attackRange && this.canAttack()) {
             this.attack();
             return;
         }
+
+        if (absoluteDistance < this.retreatRange) {
+            this.repositionAfterAttack(distanceToCharacter);
+            return;
+        }
+
+        if (absoluteDistance <= this.chaseRange) return;
 
         if (distanceToCharacter < -8) {
             this.x -= this.speed;
@@ -177,11 +194,11 @@ class Endboss extends MovableObjects {
     }
 
     canAttack() {
-        return Date.now() - this.lastAttackTime >= this.attackCooldown;
+        return !this.isRecovering && Date.now() - this.lastAttackTime >= this.attackCooldown;
     }
 
     attack() {
-        if (this.isAttacking || this.isDead) return;
+        if (this.isAttacking || this.isDead || this.isRecovering) return;
 
         this.isAttacking = true;
         this.lastAttackTime = Date.now();
@@ -189,8 +206,23 @@ class Endboss extends MovableObjects {
 
         setTimeout(() => {
             this.isAttacking = false;
+            this.isRecovering = true;
             this.currentImageIndex = 0;
+
+            setTimeout(() => {
+                this.isRecovering = false;
+            }, this.recoveryDuration);
         }, this.attackDuration);
+    }
+
+    repositionAfterAttack(distanceToCharacter) {
+        const retreatSpeed = this.speed * 0.8;
+
+        if (distanceToCharacter < 0) {
+            this.x += retreatSpeed;
+        } else {
+            this.x -= retreatSpeed;
+        }
     }
 
     getAttackBox() {
@@ -222,12 +254,14 @@ class Endboss extends MovableObjects {
         this.energy = Math.max(0, this.energy - damage);
         this.isHurt = true;
         this.isAttacking = false;
+        this.isRecovering = true;
         this.currentImageIndex = 0;
 
         if (this.energy === 0) {
             this.isDead = true;
             this.isActivated = false;
             this.isHurt = false;
+            this.isRecovering = false;
             this.currentImageIndex = 0;
             return;
         }
@@ -235,6 +269,7 @@ class Endboss extends MovableObjects {
         setTimeout(() => {
             this.isHurt = false;
             this.currentImageIndex = 0;
+            this.isRecovering = false;
         }, this.hurtDuration);
     }
 }

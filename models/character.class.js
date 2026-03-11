@@ -14,7 +14,7 @@ class Character extends MovableObjects {
 
     //Lebensenergie
     energy = 100;
-    coins = 0;
+    coins = 300;
 
      // Status
      isHurt = false;
@@ -22,6 +22,9 @@ class Character extends MovableObjects {
      isAttacking = false;
      lastHit = 0;
      lastAttackTime = 0;
+     specialUnlocked = false;
+     specialCooldown = 4500;
+     lastSpecialTime = -4500;
 
     // SpriteSheets
     SPRITE_WALK = "img/2_character_will/2_walk/Walk.png";
@@ -251,6 +254,24 @@ class Character extends MovableObjects {
     getAttackCooldownProgress() {
         const elapsed = Date.now() - this.lastAttackTime;
         return Math.max(0, Math.min(1, elapsed / this.attackCooldown));
+    }
+
+    canUseSpecial() {
+        return this.specialUnlocked && !this.isDead && Date.now() - this.lastSpecialTime >= this.specialCooldown;
+    }
+
+    activateSpecial() {
+        if (!this.canUseSpecial()) return false;
+
+        this.lastSpecialTime = Date.now();
+        return true;
+    }
+
+    getSpecialCooldownProgress() {
+        if (!this.specialUnlocked) return 0;
+
+        const elapsed = Date.now() - this.lastSpecialTime;
+        return Math.max(0, Math.min(1, elapsed / this.specialCooldown));
     }
 
     getAttackBox() {

@@ -7,6 +7,7 @@ class AudioManager {
         this.hurtSound = new Audio("audio/hurt.mp3");
         this.collectSound = new Audio("audio/Collect_sound.wav");
         this.attackSound = new Audio("audio/Karateka_attack.wav");
+        this.laserSound = new Audio("audio/laser_sound.wav");
         this.evilLaughSound = new Audio("audio/evil-laugh.mp3");
         this.backgroundLoop.loop = true;
         this.backgroundLoop.volume = 0.35;
@@ -14,6 +15,7 @@ class AudioManager {
         this.hurtSound.volume = 0.5;
         this.collectSound.volume = 0.45;
         this.attackSound.volume = 0.45;
+        this.laserSound.volume = 0.5;
         this.evilLaughSound.volume = 0.6;
         this.isMuted = this.loadMutedPreference();
         this.applyMuteState();
@@ -41,6 +43,7 @@ class AudioManager {
         this.hurtSound.muted = this.isMuted;
         this.collectSound.muted = this.isMuted;
         this.attackSound.muted = this.isMuted;
+        this.laserSound.muted = this.isMuted;
         this.evilLaughSound.muted = this.isMuted;
     }
 
@@ -80,6 +83,10 @@ class AudioManager {
 
     playEvilLaughSound() {
         this.playEffect(this.evilLaughSound);
+    }
+
+    playLaserSound() {
+        this.playEffect(this.laserSound);
     }
 
     playEffect(audio) {

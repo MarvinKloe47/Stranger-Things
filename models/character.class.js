@@ -79,7 +79,7 @@ class Character extends MovableObjects {
     animate() {
 
         // Bewegung + Kamera
-        setInterval(() => {
+        gameSetInterval(() => {
             if (this.isDead) {
                 this.world.camera_x = -this.x;
                 return;
@@ -107,7 +107,7 @@ class Character extends MovableObjects {
         }, 1000 / 30);
 
         // Laufanimation (Frames wechseln)
-        setInterval(() => {
+        gameSetInterval(() => {
             const isMoving = this.world?.keyboard &&
                 (this.world.keyboard.RIGHT || this.world.keyboard.LEFT);
             const isJumping = this.isAboveGround() || this.speedY > 0;
@@ -227,9 +227,7 @@ class Character extends MovableObjects {
 
     jump() {
         this.speedY = 20;
-        if (typeof audioManager !== "undefined") {
-            audioManager.playJumpSound();
-        }
+        this.world?.audioManager?.playJumpSound();
     }
 
     attack() {
@@ -238,11 +236,9 @@ class Character extends MovableObjects {
         this.isAttacking = true;
         this.lastAttackTime = Date.now();
         this.currentFrame = 0;
-        if (typeof audioManager !== "undefined") {
-            audioManager.playAttackSound();
-        }
+        this.world?.audioManager?.playAttackSound();
 
-        setTimeout(() => {
+        gameSetTimeout(() => {
             this.isAttacking = false;
         }, this.attackDuration);
     }

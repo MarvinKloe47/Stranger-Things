@@ -1,3 +1,9 @@
+@font-face
+{
+    font-family: "ArcadeFallback";
+    src: local("Trebuchet MS");
+}
+
 body
 {
     display: flex;
@@ -13,7 +19,7 @@ body
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    font-family: Arial, sans-serif;
+    font-family: "ArcadeFallback", Arial, sans-serif;
 }
 
 h1
@@ -206,6 +212,24 @@ h1
     background: transparent;
     box-shadow: none;
     overflow: visible;
+}
+
+.modal__panel--text
+{
+    width: min(92vw, 520px);
+    color: white;
+}
+
+.modal__panel--text h2
+{
+    margin-top: 0;
+}
+
+.imprint-link
+{
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
 }
 
 .modal:not(.hidden) .modal__panel
@@ -611,6 +635,11 @@ h1
         width: 100vw;
         min-height: 100vh;
         overflow: hidden;
+    }
+
+    .imprint-link
+    {
+        display: none;
     }
 
     h1

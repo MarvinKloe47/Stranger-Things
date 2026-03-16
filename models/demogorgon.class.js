@@ -1,4 +1,4 @@
-class demogorgon extends MovableObjects 
+class Demogorgon extends MovableObjects 
 {
     offset = {
         top: 24,
@@ -32,8 +32,10 @@ class demogorgon extends MovableObjects
 
 
      animate() {
-        this.moveLeft();
-        setInterval(() => {
+        gameSetInterval(() => {
+            this.moveLeft();
+        }, 1000 / 60);
+        gameSetInterval(() => {
         let i = this.currentImageIndex % this.IMAGES_WALKING.length;
         let path = this.IMAGES_WALKING[i]; 
         this.img = this.imageCache[path]

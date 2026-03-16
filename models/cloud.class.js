@@ -14,7 +14,9 @@ class Cloud extends MovableObjects
     }  
 
     animate() {
-        this.moveLeft();
+        gameSetInterval(() => {
+            this.moveLeft();
+        }, 1000 / 60);
     }
 
     

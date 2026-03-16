@@ -118,7 +118,7 @@ class Endboss extends MovableObjects {
     }
 
     animate() {
-        setInterval(() => {
+        gameSetInterval(() => {
             const frames = this.getCurrentFrames();
             const i = this.currentImageIndex % frames.length;
             const path = frames[i];
@@ -152,7 +152,7 @@ class Endboss extends MovableObjects {
         this.isAwakening = true;
         this.currentImageIndex = 0;
 
-        setTimeout(() => {
+        gameSetTimeout(() => {
             this.isAwakening = false;
             this.isActivated = true;
             this.currentAnimation = 'run';
@@ -204,12 +204,12 @@ class Endboss extends MovableObjects {
         this.lastAttackTime = Date.now();
         this.currentImageIndex = 0;
 
-        setTimeout(() => {
+        gameSetTimeout(() => {
             this.isAttacking = false;
             this.isRecovering = true;
             this.currentImageIndex = 0;
 
-            setTimeout(() => {
+            gameSetTimeout(() => {
                 this.isRecovering = false;
             }, this.recoveryDuration);
         }, this.attackDuration);
@@ -266,7 +266,7 @@ class Endboss extends MovableObjects {
             return;
         }
 
-        setTimeout(() => {
+        gameSetTimeout(() => {
             this.isHurt = false;
             this.currentImageIndex = 0;
             this.isRecovering = false;

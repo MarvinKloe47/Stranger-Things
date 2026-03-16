@@ -12,7 +12,7 @@ class MovableObjects extends DrawableObject
     };
 
     applyGravity() {
-        setInterval(() => {
+        gameSetInterval(() => {
             if (this.isAboveGround() || this.speedY > 0)  {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
@@ -33,15 +33,11 @@ class MovableObjects extends DrawableObject
     
     moveRight()
     {
-        setInterval(() => {
-            this.x += this.speed;
-        }, 1000 / 60);
+        this.x += this.speed;
     }
 
     moveLeft()
     {
-        setInterval(() => {
-            this.x -= this.speed;
-        }, 1000 / 60);
+        this.x -= this.speed;
     }
 }

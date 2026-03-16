@@ -46,8 +46,10 @@ class Orc extends MovableObjects {
     }
 
     animate() {
-        this.moveLeft();
-        setInterval(() => {
+        gameSetInterval(() => {
+            this.moveLeft();
+        }, 1000 / 60);
+        gameSetInterval(() => {
             const i = this.currentImageIndex % this.IMAGES_WALKING.length;
             const path = this.IMAGES_WALKING[i];
             this.img = this.imageCache[path];

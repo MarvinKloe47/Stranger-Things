@@ -1,4 +1,6 @@
 class DrawableObject {
+    static debugMode = false;
+
     x = 120;
     y = 250;
     img;
@@ -44,7 +46,7 @@ class DrawableObject {
     }
 
     drawDebugRect(ctx) {
-        if (typeof debugMode === "undefined" || !debugMode) return;
+        if (!DrawableObject.debugMode) return;
 
         const hasCollisionBox =
             typeof this.offset !== "undefined" &&

@@ -23,7 +23,7 @@ class Coin extends DrawableObject {
     }
 
     animate() {
-        setInterval(() => {
+        gameSetInterval(() => {
             const imageIndex = this.currentImageIndex % this.IMAGES.length;
             const path = this.IMAGES[imageIndex];
             this.img = this.imageCache[path];

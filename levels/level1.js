@@ -1,5 +1,7 @@
 const LEVEL_END_X = 3200;
 const PLAYER_SAFE_ZONE_X = 520;
+const LEVEL_VIEWPORT_WIDTH = 720;
+const LEVEL_VIEWPORT_HEIGHT = 480;
 
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -30,19 +32,44 @@ function createRandomEnemies() {
     const endDemogorgonPositions = generateEnemySpawns(2, 2200, 2850, 260);
 
     const orcs = [...midOrcPositions, ...endOrcPositions].map((x) => new Orc(x));
-    const demogorgons = [...midDemogorgonPositions, ...endDemogorgonPositions].map((x) => new demogorgon(x));
+    const demogorgons = [...midDemogorgonPositions, ...endDemogorgonPositions].map((x) => new Demogorgon(x));
     const endboss = new Endboss(LEVEL_END_X - 120);
 
     return [...orcs, ...demogorgons, endboss].sort((a, b) => a.x - b.x);
 }
 
-function createLevel1() {
+function createBackgroundObjects(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIEWPORT_HEIGHT) {
+    const brightLayers = [
+        { path: "img/5_background/bright/Sky.png", y: 0 },
+        { path: "img/5_background/bright/City2.png", y: 0 },
+        { path: "img/5_background/bright/back.png", y: 0 },
+        { path: "img/5_background/bright/houses1.png", y: 0 },
+        { path: "img/5_background/bright/houses3.png", y: 0 },
+        { path: "img/5_background/bright/minishop&callbox.png", y: 0 },
+        { path: "img/5_background/bright/road&lamps.png", y: 0 },
+    ];
+    const backgroundRepeats = Math.ceil(LEVEL_END_X / worldWidth) + 1;
+    const backgroundObjects = [];
+
+    for (let i = -1; i <= backgroundRepeats; i++) {
+        const x = i * worldWidth;
+        brightLayers.forEach((layer) => {
+            backgroundObjects.push(
+                new BackgroundObject(layer.path, x, layer.y, worldWidth, worldHeight)
+            );
+        });
+    }
+
+    return backgroundObjects;
+}
+
+function createLevel1(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIEWPORT_HEIGHT) {
     return new Level(
         createRandomEnemies(),
         [
             new Cloud(),
         ],
-        [],
+        createBackgroundObjects(worldWidth, worldHeight),
         [
             new Coin(260, 320),
             new Coin(430, 180),

@@ -27,32 +27,60 @@
 <body onload="init()">
     <h1>Stranger Things by Marvin und Quentin</h1>
 
+    <div id="rotate-overlay" class="rotate-overlay hidden" aria-hidden="true">
+        <div class="rotate-overlay__panel">
+            <p class="rotate-overlay__title">Please Rotate ur Phone</p>
+            <p class="rotate-overlay__subtitle">Switch to landscape mode to play.</p>
+        </div>
+    </div>
+
     <div class="game-stage">
-        <canvas id="canvas" width="720" height="480"></canvas>
+        <div class="game-viewport">
+            <canvas id="canvas" width="720" height="480"></canvas>
 
-        <div id="start-screen" class="start-screen">
-            <img
-                class="start-screen__bg"
-                src="img/7_ProjectIMG/start-screen.png"
-                alt="Start screen"
-            >
+            <div id="start-screen" class="start-screen">
+                <img
+                    class="start-screen__bg"
+                    src="img/7_ProjectIMG/start-screen.png"
+                    alt="Start screen"
+                >
 
-            <div class="start-screen__buttons">
-                <button id="play-button" class="menu-button menu-button--play" type="button" aria-label="Start game">
-                    <img src="img/7_ProjectIMG/play.png" alt="Play">
-                </button>
-                <button id="shop-button" class="menu-button" type="button" aria-label="Open shop">
-                    <img src="img/9_shop/shop-btn.png" alt="Shop">
-                </button>
-                <button id="music-button" class="menu-button" type="button" aria-label="Music on">
-                    <img id="music-button-icon" src="img/7_ProjectIMG/misic.png" alt="Music">
-                </button>
-                <button id="control-button" class="menu-button" type="button" aria-label="Show controls">
-                    <img src="img/7_ProjectIMG/control.png" alt="Controls">
-                </button>
-                <button id="info-button" class="menu-button" type="button" aria-label="Show info">
-                    <img src="img/7_ProjectIMG/about.png" alt="Info">
-                </button>
+                <div class="start-screen__buttons">
+                    <button id="play-button" class="menu-button menu-button--play" type="button" aria-label="Start game">
+                        <img src="img/7_ProjectIMG/play.png" alt="Play">
+                    </button>
+                    <button id="shop-button" class="menu-button" type="button" aria-label="Open shop">
+                        <img src="img/9_shop/shop-btn.png" alt="Shop">
+                    </button>
+                    <button id="music-button" class="menu-button" type="button" aria-label="Music on">
+                        <img id="music-button-icon" src="img/7_ProjectIMG/misic.png" alt="Music">
+                    </button>
+                    <button id="control-button" class="menu-button" type="button" aria-label="Show controls">
+                        <img src="img/7_ProjectIMG/control.png" alt="Controls">
+                    </button>
+                    <button id="info-button" class="menu-button" type="button" aria-label="Show info">
+                        <img src="img/7_ProjectIMG/about.png" alt="Info">
+                    </button>
+                </div>
+            </div>
+
+            <div id="mobile-controls" class="mobile-controls" aria-label="Mobile controls">
+                <div class="mobile-controls__group mobile-controls__group--movement">
+                    <div id="mobile-joystick" class="mobile-joystick" aria-label="Movement joystick">
+                        <img class="mobile-joystick__pad" src="img/7_ProjectIMG/Mobile/joystick_circle_pad_a.svg" alt="">
+                        <img id="mobile-joystick-nub" class="mobile-joystick__nub" src="img/7_ProjectIMG/Mobile/joystick_circle_nub_a.svg" alt="">
+                    </div>
+                </div>
+                <div class="mobile-controls__group mobile-controls__group--actions">
+                    <button class="mobile-control-button mobile-control-button--text" type="button" data-mobile-control="attack" aria-label="Attack">
+                        <span>Attack</span>
+                        <small>D</small>
+                    </button>
+                    <button class="mobile-control-button mobile-control-button--text" type="button" data-mobile-control="special" aria-label="Special attack">
+                        <span>Special</span>
+                        <small>S</small>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

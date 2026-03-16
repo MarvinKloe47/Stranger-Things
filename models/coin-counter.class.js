@@ -1,7 +1,7 @@
 class CoinCounter extends DrawableObject {
     ICON = "img/8_collectables/coin counter.png";
 
-    value = 300;
+    value = 0;
     textOffsetX = 0;
     textOffsetY = -2;
 

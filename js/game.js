@@ -19,6 +19,12 @@ let buySpecialButton;
 let shopCoinsValue;
 let shopSpecialMessage;
 let shopUnlockedBanner;
+let rotateOverlay;
+let mobileControls;
+let mobileJoystick;
+let mobileJoystickNub;
+let activeJoystickPointerId = null;
+let joystickJumpTriggered = false;
 const restartOnLoadKey = "stranger-things-restart-on-load";
 const coinStorageKey = "stranger-things-coins";
 const specialStorageKey = "stranger-things-special-unlocked";
@@ -36,6 +42,10 @@ function init()
     infoModal = document.getElementById("info-modal");
     controlsModal = document.getElementById("controls-modal");
     shopModal = document.getElementById("shop-modal");
+    rotateOverlay = document.getElementById("rotate-overlay");
+    mobileControls = document.getElementById("mobile-controls");
+    mobileJoystick = document.getElementById("mobile-joystick");
+    mobileJoystickNub = document.getElementById("mobile-joystick-nub");
     endScreen = document.getElementById("end-screen");
     endScreenImage = document.getElementById("end-screen-image");
     restartButton = document.getElementById("restart-button");
@@ -59,8 +69,10 @@ function init()
         element.addEventListener("click", closeModals);
     });
 
+    bindMobileControls();
     updateMusicButton();
     updateShopUi();
+    updateOrientationOverlay();
 
     if (sessionStorage.getItem(restartOnLoadKey) === "true") {
         sessionStorage.removeItem(restartOnLoadKey);
@@ -69,6 +81,11 @@ function init()
 }
 
 function startGame() {
+    if (isPortraitMobile()) {
+        updateOrientationOverlay();
+        return;
+    }
+
     playButton?.classList.add("menu-button--active");
 
     setTimeout(() => {
@@ -102,6 +119,150 @@ function updateMusicButton() {
     if (musicButton) {
         musicButton.setAttribute("aria-label", isMuted ? "Music off" : "Music on");
     }
+}
+
+function isMobileViewport() {
+    return window.matchMedia("(hover: none) and (pointer: coarse)").matches || window.innerWidth <= 900;
+}
+
+function isPortraitMobile() {
+    return isMobileViewport() && window.innerHeight > window.innerWidth;
+}
+
+function updateOrientationOverlay() {
+    if (!rotateOverlay) return;
+
+    const shouldShow = isPortraitMobile();
+    rotateOverlay.classList.toggle("hidden", !shouldShow);
+    rotateOverlay.classList.toggle("rotate-overlay--active", shouldShow);
+    rotateOverlay.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+
+    if (mobileControls) {
+        mobileControls.classList.toggle("hidden", shouldShow);
+    }
+}
+
+function setControlState(control, isActive) {
+    switch (control) {
+        case "left":
+            keyboard.LEFT = isActive;
+            break;
+        case "right":
+            keyboard.RIGHT = isActive;
+            break;
+        case "jump":
+            keyboard.SPACE = isActive;
+            break;
+        case "attack":
+            keyboard.D = isActive;
+            break;
+        case "special":
+            keyboard.S = isActive;
+            if (isActive) {
+                world?.triggerSpecialAttack?.();
+            }
+            break;
+    }
+}
+
+function resetJoystick() {
+    if (mobileJoystickNub) {
+        mobileJoystickNub.style.transform = "translate(-50%, -50%)";
+    }
+
+    keyboard.LEFT = false;
+    keyboard.RIGHT = false;
+    keyboard.SPACE = false;
+    joystickJumpTriggered = false;
+}
+
+function updateJoystickPosition(clientX, clientY) {
+    if (!mobileJoystick || !mobileJoystickNub) return;
+
+    const rect = mobileJoystick.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const deltaX = clientX - centerX;
+    const deltaY = clientY - centerY;
+    const maxDistance = rect.width * 0.28;
+    const distance = Math.hypot(deltaX, deltaY);
+    const clampedDistance = Math.min(distance, maxDistance);
+    const angle = Math.atan2(deltaY, deltaX);
+    const knobX = Math.cos(angle) * clampedDistance;
+    const knobY = Math.sin(angle) * clampedDistance;
+
+    mobileJoystickNub.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+
+    keyboard.LEFT = knobX < -14;
+    keyboard.RIGHT = knobX > 14;
+
+    if (knobY < -20 && !joystickJumpTriggered) {
+        keyboard.SPACE = true;
+        joystickJumpTriggered = true;
+    } else if (knobY > -8) {
+        keyboard.SPACE = false;
+        joystickJumpTriggered = false;
+    }
+}
+
+function releaseMobileControls() {
+    ["attack", "special"].forEach((control) => setControlState(control, false));
+    resetJoystick();
+}
+
+function bindMobileControls() {
+    if (!mobileControls) return;
+
+    if (mobileJoystick) {
+        const startJoystick = (event) => {
+            event.preventDefault();
+            if (isPortraitMobile()) return;
+
+            activeJoystickPointerId = event.pointerId;
+            mobileJoystick.setPointerCapture?.(event.pointerId);
+            updateJoystickPosition(event.clientX, event.clientY);
+        };
+
+        const moveJoystick = (event) => {
+            if (event.pointerId !== activeJoystickPointerId) return;
+            event.preventDefault();
+            updateJoystickPosition(event.clientX, event.clientY);
+        };
+
+        const endJoystick = (event) => {
+            if (event.pointerId !== activeJoystickPointerId) return;
+            event.preventDefault();
+            activeJoystickPointerId = null;
+            resetJoystick();
+        };
+
+        mobileJoystick.addEventListener("pointerdown", startJoystick);
+        mobileJoystick.addEventListener("pointermove", moveJoystick);
+        mobileJoystick.addEventListener("pointerup", endJoystick);
+        mobileJoystick.addEventListener("pointercancel", endJoystick);
+        mobileJoystick.addEventListener("lostpointercapture", endJoystick);
+    }
+
+    mobileControls.querySelectorAll("[data-mobile-control]").forEach((button) => {
+        const control = button.getAttribute("data-mobile-control");
+        if (!control) return;
+
+        const activate = (event) => {
+            event.preventDefault();
+            if (isPortraitMobile()) return;
+            setControlState(control, true);
+        };
+
+        const deactivate = (event) => {
+            event.preventDefault();
+            setControlState(control, false);
+        };
+
+        button.addEventListener("pointerdown", activate);
+        button.addEventListener("pointerup", deactivate);
+        button.addEventListener("pointercancel", deactivate);
+        button.addEventListener("pointerleave", deactivate);
+    });
 }
 
 function getStoredCoins() {
@@ -211,6 +372,8 @@ function isStartScreenVisible() {
 function openModal(modal) {
     if (!modal) return;
 
+    if (isPortraitMobile()) return;
+
     modal.classList.remove("hidden");
     modal.setAttribute("aria-hidden", "false");
 }
@@ -245,7 +408,13 @@ function returnToMainMenu() {
     window.location.reload();
 }
 
+window.addEventListener("resize", updateOrientationOverlay);
+window.addEventListener("orientationchange", updateOrientationOverlay);
+window.addEventListener("blur", releaseMobileControls);
+
 window.addEventListener("keydown", (e) => {
+    if (isPortraitMobile()) return;
+
     if (e.code === "Escape") {
         closeModals();
     }
@@ -297,6 +466,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
+    if (isPortraitMobile()) return;
     if (!world) return;
 
     if (e.code === "ArrowRight") {

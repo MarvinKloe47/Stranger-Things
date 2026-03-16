@@ -14,7 +14,7 @@ class Character extends MovableObjects {
 
     //Lebensenergie
     energy = 100;
-    coins = 300;
+    coins = 0;
 
      // Status
      isHurt = false;

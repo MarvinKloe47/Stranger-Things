@@ -95,11 +95,6 @@ function updateShopUi() {
         buySpecialButton.textContent = unlocked ? "Unlocked" : "Buy Upgrade";
     }
 
-    if (shopUnlockedBanner) {
-        shopUnlockedBanner.classList.toggle("hidden", !unlocked);
-        shopUnlockedBanner.setAttribute("aria-hidden", unlocked ? "false" : "true");
-    }
-
     if (unlocked) {
         setShopMessage("Special attack unlocked. Use S in-game.", "success");
     } else if (coins < specialPrice) {

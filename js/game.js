@@ -82,7 +82,7 @@ function registerUiEvents() {
     restartButton?.addEventListener("click", restartGame);
     menuButton?.addEventListener("click", returnToMainMenu);
     buySpecialButton?.addEventListener("click", buySpecialAttack);
-    document.getElementById("info-button")?.addEventListener("click", () => openModal(infoModal));
+    document.getElementById("info-button")?.addEventListener("click", () => openModal(imprintModal));
     document.getElementById("control-button")?.addEventListener("click", () => openModal(controlsModal));
     document.getElementById("imprint-link")?.addEventListener("click", handleImprintLinkClick);
     document.querySelectorAll("[data-close-modal='true']").forEach((element) => element.addEventListener("click", closeModals));

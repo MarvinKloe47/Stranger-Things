@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Ground enemy that walks from right to left and requires multiple hits.
  */
 class Troll extends MovableObjects 
@@ -10,37 +10,37 @@ class Troll extends MovableObjects
         left: 58,
     };
     IMAGES_WALKING = [
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_002.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_003.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_004.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_005.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_006.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_007.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_008.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_001.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_002.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_003.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_004.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_005.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_006.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_007.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_008.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_009.png",
     ];
     IMAGES_ATTACK = [
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_000.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_001.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_002.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_003.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_006.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_007.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_008.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_ATTACK_009.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_000.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_001.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_002.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_003.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_006.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_007.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_008.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_ATTACK_009.png",
     ];
     IMAGES_DEAD = [
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_000.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_001.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_002.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_003.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_004.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_005.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_006.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_007.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_008.png",
-        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_DIE_009.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_000.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_001.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_002.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_003.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_004.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_005.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_006.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_007.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_008.png",
+        "assets/img/3_enemies_troll/1_walk/Troll_01_1_DIE_009.png",
     ];
     remainingHealth = 2;
     maxRemainingHealth = 2;
@@ -63,7 +63,7 @@ class Troll extends MovableObjects
      */
     constructor(x = 700) {
         super();
-        this.loadImage("assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
+        this.loadImage("assets/img/3_enemies_troll/1_walk/Troll_01_1_WALK_001.png");
         this.loadImages([...this.IMAGES_WALKING, ...this.IMAGES_ATTACK, ...this.IMAGES_DEAD]);
         this.setSize(170, 200);
         this.x = x;
@@ -235,3 +235,4 @@ class Troll extends MovableObjects
         return true;
     }
 }
+

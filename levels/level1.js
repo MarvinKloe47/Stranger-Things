@@ -1,4 +1,4 @@
-const LEVEL_END_X = 3200;
+﻿const LEVEL_END_X = 3200;
 const PLAYER_SAFE_ZONE_X = 520;
 const LEVEL_VIEWPORT_WIDTH = 720;
 const LEVEL_VIEWPORT_HEIGHT = 480;
@@ -41,19 +41,19 @@ function generateEnemySpawns(count, minX, maxX, minDistance) {
 
 /**
  * Creates all regular enemies and the boss for level one.
- * @returns {(Orc|Demogorgon|Endboss)[]} The generated enemy list.
+ * @returns {(Orc|Troll|Endboss)[]} The generated enemy list.
  */
 function createRandomEnemies() {
     const midOrcPositions = generateEnemySpawns(4, PLAYER_SAFE_ZONE_X, 1800, 220);
     const endOrcPositions = generateEnemySpawns(3, 2100, 2800, 180);
-    const midDemogorgonPositions = generateEnemySpawns(3, 820, 2100, 320);
-    const endDemogorgonPositions = generateEnemySpawns(2, 2200, 2850, 260);
+    const midTrollPositions = generateEnemySpawns(3, 820, 2100, 320);
+    const endTrollPositions = generateEnemySpawns(2, 2200, 2850, 260);
 
     const orcs = [...midOrcPositions, ...endOrcPositions].map((x) => new Orc(x));
-    const demogorgons = [...midDemogorgonPositions, ...endDemogorgonPositions].map((x) => new Demogorgon(x));
+    const trolls = [...midTrollPositions, ...endTrollPositions].map((x) => new Troll(x));
     const endboss = new Endboss(LEVEL_END_X - 120);
 
-    return [...orcs, ...demogorgons, endboss].sort((a, b) => a.x - b.x);
+    return [...orcs, ...trolls, endboss].sort((a, b) => a.x - b.x);
 }
 
 /**
@@ -130,3 +130,4 @@ function createLevel1(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIE
         LEVEL_END_X
     );
 }
+

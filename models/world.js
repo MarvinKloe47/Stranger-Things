@@ -166,20 +166,53 @@ class World {
      * Applies melee damage to enemies hit by the player.
      */
     checkAttackCollisions() {
-        if (!this.character.isAttacking) return;
+        if (!this.character.isInAttackHitWindow()) return;
         const attackBox = this.character.getAttackBox();
 
         this.enemies = this.enemies.filter((enemy) => {
             if (enemy instanceof Endboss) {
-                if (this.isColliding(attackBox, enemy)) {
-                    enemy.takeHit(25, this.character.lastAttackTime);
-                    this.bossStatusBar.setPercentage(enemy.energy);
-                }
-                return true;
+                return this.checkBossHitDuringAttack(enemy, attackBox);
             }
 
-            return !this.isColliding(attackBox, enemy);
+            return this.checkEnemyHitDuringAttack(enemy, attackBox);
         });
+    }
+
+    /**
+     * Resolves one regular enemy hit during the current player attack.
+     * @param {MovableObjects} enemy The enemy to check.
+     * @param {Object} attackBox The current player attack box.
+     * @returns {boolean} True if the enemy remains alive.
+     */
+    checkEnemyHitDuringAttack(enemy, attackBox) {
+        if (!this.shouldApplyPlayerAttackHit(enemy, attackBox)) return true;
+        this.character.markTargetHitInCurrentAttack(enemy);
+        return false;
+    }
+
+    /**
+     * Resolves one boss hit during the current player attack.
+     * @param {Endboss} boss The boss to check.
+     * @param {Object} attackBox The current player attack box.
+     * @returns {boolean} True because the boss remains in the enemy list.
+     */
+    checkBossHitDuringAttack(boss, attackBox) {
+        if (!this.shouldApplyPlayerAttackHit(boss, attackBox)) return true;
+        this.character.markTargetHitInCurrentAttack(boss);
+        boss.takeHit(25, this.character.lastAttackTime);
+        this.bossStatusBar.setPercentage(boss.energy);
+        return true;
+    }
+
+    /**
+     * Checks whether the target may receive damage in the current attack.
+     * @param {MovableObjects} target The collision target.
+     * @param {Object} attackBox The current player attack box.
+     * @returns {boolean} True if this target can be hit now.
+     */
+    shouldApplyPlayerAttackHit(target, attackBox) {
+        return this.isColliding(attackBox, target)
+            && !this.character.hasHitTargetInCurrentAttack(target);
     }
 
     /**
@@ -284,6 +317,8 @@ class World {
      * Clears the temporary hurt state after the hurt animation time.
      */
     updateCharacterStates() {
+        this.character.updateAttackState();
+
         if (!this.character.isDead && Date.now() - this.character.lastHit >= 500) {
             this.character.isHurt = false;
         }

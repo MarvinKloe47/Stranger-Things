@@ -7,26 +7,31 @@ class Character extends MovableObjects {
         bottom: 12,
         left: 42,
     };
-    // Bewegung
+    
     speed = 10;
-    // Positive Werte verschieben den Character nach oben, negative nach unten.
+    
     yOffset = -30;
 
-    //Lebensenergie
+    
     energy = 100;
     coins = 0;
 
-     // Status
+    
      isHurt = false;
      isDead = false;
      isAttacking = false;
      lastHit = 0;
      lastAttackTime = 0;
+    attackStartTime = 0;
+    attackHitWindowStart = 90;
+    attackHitWindowEnd = 210;
+    attackSoundPlayed = false;
+    attackedTargetsInCurrentAttack = new Set();
      specialUnlocked = false;
      specialCooldown = 4500;
      lastSpecialTime = -4500;
 
-    // SpriteSheets
+   
     SPRITE_WALK = "assets/img/2_character_will/2_walk/Walk.png";
     IMAGES_JUMP = ["assets/img/2_character_will/3_jump/Jump.png"];
     SPRITE_HURT = "assets/img/2_character_will/4_hurt/Hurt.png";
@@ -81,6 +86,7 @@ class Character extends MovableObjects {
         // Bewegung + Kamera
         gameSetInterval(() => {
             if (this.isDead) {
+                this.updateAttackState();
                 this.world.camera_x = -this.x;
                 return;
             }
@@ -100,7 +106,13 @@ class Character extends MovableObjects {
             }
 
             if (this.world?.keyboard?.D) {
-                this.attack();
+                this.startAttack();
+            }
+
+            this.updateAttackState();
+
+            if (this.shouldPlayAttackSound()) {
+                this.world?.audioManager?.playAttackSound();
             }
 
             this.world.camera_x = -this.x;
@@ -231,16 +243,66 @@ class Character extends MovableObjects {
     }
 
     attack() {
-        if (this.isDead || this.isAttacking || !this.canAttack()) return;
+        this.startAttack();
+    }
 
+    startAttack() {
+        if (!this.canStartAttack()) return false;
+
+        const now = Date.now();
         this.isAttacking = true;
-        this.lastAttackTime = Date.now();
+        this.lastAttackTime = now;
+        this.attackStartTime = now;
+        this.attackSoundPlayed = false;
+        this.attackedTargetsInCurrentAttack.clear();
         this.currentFrame = 0;
-        this.world?.audioManager?.playAttackSound();
+        this.activateAttackAnimation();
+        return true;
+    }
 
-        gameSetTimeout(() => {
-            this.isAttacking = false;
-        }, this.attackDuration);
+    canStartAttack() {
+        return !this.isDead && !this.isAttacking && this.canAttack();
+    }
+
+    updateAttackState() {
+        if (!this.isAttacking) return;
+
+        if (this.isDead) {
+            this.resetAttackState();
+            return;
+        }
+
+        const elapsed = Date.now() - this.attackStartTime;
+        if (elapsed >= this.attackDuration) {
+            this.resetAttackState();
+        }
+    }
+
+    isInAttackHitWindow() {
+        if (!this.isAttacking) return false;
+        const elapsed = Date.now() - this.attackStartTime;
+        return elapsed >= this.attackHitWindowStart && elapsed <= this.attackHitWindowEnd;
+    }
+
+    shouldPlayAttackSound() {
+        if (this.attackSoundPlayed || !this.isInAttackHitWindow()) return false;
+        this.attackSoundPlayed = true;
+        return true;
+    }
+
+    resetAttackState() {
+        this.isAttacking = false;
+        this.attackStartTime = 0;
+        this.attackSoundPlayed = false;
+        this.attackedTargetsInCurrentAttack.clear();
+    }
+
+    hasHitTargetInCurrentAttack(target) {
+        return this.attackedTargetsInCurrentAttack.has(target);
+    }
+
+    markTargetHitInCurrentAttack(target) {
+        this.attackedTargetsInCurrentAttack.add(target);
     }
 
     canAttack() {

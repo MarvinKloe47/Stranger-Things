@@ -208,11 +208,6 @@ class World {
             return enemy.takeHit(1);
         }
 
-        if (enemy instanceof Orc) {
-            enemy.hitsTaken = (enemy.hitsTaken ?? 0) + 1;
-            return enemy.hitsTaken < 2;
-        }
-
         return false;
     }
 

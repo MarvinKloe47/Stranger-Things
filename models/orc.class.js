@@ -32,6 +32,7 @@ class Orc extends MovableObjects {
         "assets/img/3_enemies_demogorgon/2_enemies_orc/0_Orc_Walking_022.png",
         "assets/img/3_enemies_demogorgon/2_enemies_orc/0_Orc_Walking_023.png",
     ];
+    remainingHealth = 1;
 
     constructor(x = 500 + Math.random() * 900) {
         super();
@@ -55,5 +56,15 @@ class Orc extends MovableObjects {
             this.img = this.imageCache[path];
             this.currentImageIndex++;
         }, 120);
+    }
+
+    /**
+     * Applies melee damage and returns whether the orc survives.
+     * @param {number} [damage=1] Incoming damage points.
+     * @returns {boolean} True while the orc is still alive.
+     */
+    takeHit(damage = 1) {
+        this.remainingHealth = Math.max(0, this.remainingHealth - damage);
+        return this.remainingHealth > 0;
     }
 }

@@ -17,6 +17,7 @@ class Demogorgon extends MovableObjects
         "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_008.png",
         "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
         ];
+    remainingHealth = 2;
 
     constructor(x = 700) {
         super();
@@ -42,5 +43,15 @@ class Demogorgon extends MovableObjects
         this.currentImageIndex++;
         }, 200);
         
+    }
+
+    /**
+     * Applies melee damage and returns whether the demogorgon survives.
+     * @param {number} [damage=1] Incoming damage points.
+     * @returns {boolean} True while the demogorgon is still alive.
+     */
+    takeHit(damage = 1) {
+        this.remainingHealth = Math.max(0, this.remainingHealth - damage);
+        return this.remainingHealth > 0;
     }
 }

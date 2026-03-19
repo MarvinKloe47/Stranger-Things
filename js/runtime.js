@@ -1,3 +1,6 @@
+/**
+ * Tracks and controls all timers and animation frames created during a game session.
+ */
 class GameRuntime {
     static intervalIds = [];
     static timeoutIds = [];
@@ -51,14 +54,31 @@ class GameRuntime {
     }
 }
 
+/**
+ * Creates a tracked interval for the active game runtime.
+ * @param {Function} callback Function executed each interval tick.
+ * @param {number} delay Interval delay in milliseconds.
+ * @returns {number} Browser interval id.
+ */
 function gameSetInterval(callback, delay) {
     return GameRuntime.setInterval(callback, delay);
 }
 
+/**
+ * Creates a tracked timeout for the active game runtime.
+ * @param {Function} callback Function executed once after the delay.
+ * @param {number} delay Timeout delay in milliseconds.
+ * @returns {number} Browser timeout id.
+ */
 function gameSetTimeout(callback, delay) {
     return GameRuntime.setTimeout(callback, delay);
 }
 
+/**
+ * Creates a tracked animation frame request for the active game runtime.
+ * @param {FrameRequestCallback} callback Animation frame callback.
+ * @returns {number} Browser animation frame request id.
+ */
 function gameRequestAnimationFrame(callback) {
     return GameRuntime.requestAnimationFrame(callback);
 }

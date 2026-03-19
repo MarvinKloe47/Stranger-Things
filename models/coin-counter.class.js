@@ -1,3 +1,6 @@
+/**
+ * HUD element that displays collected coin count.
+ */
 class CoinCounter extends DrawableObject {
     ICON = "assets/img/8_collectables/coin counter.png";
 
@@ -5,6 +8,9 @@ class CoinCounter extends DrawableObject {
     textOffsetX = 0;
     textOffsetY = -2;
 
+    /**
+     * Creates the coin counter and icon position.
+     */
     constructor() {
         super();
         this.loadImage(this.ICON);
@@ -14,10 +20,18 @@ class CoinCounter extends DrawableObject {
         this.height = 120;
     }
 
+    /**
+     * Updates the displayed coin value.
+     * @param {number} value Current coin count.
+     */
     setValue(value) {
         this.value = value;
     }
 
+    /**
+     * Draws the icon plus centered coin value text.
+     * @param {CanvasRenderingContext2D} ctx Render context.
+     */
     draw(ctx) {
         super.draw(ctx);
 

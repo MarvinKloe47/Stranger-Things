@@ -1,3 +1,6 @@
+/**
+ * Endboss AI with explicit state-driven movement, attacks, and animations.
+ */
 class Endboss extends MovableObjects {
     offset = {
         top: 32,
@@ -5,19 +8,6 @@ class Endboss extends MovableObjects {
         bottom: 20,
         left: 72,
     };
-
-    IMAGES_WALKING = [
-        'assets/img/5_endboss/Walk_000.png',
-        'assets/img/5_endboss/Walk_001.png',
-        'assets/img/5_endboss/Walk_002.png',
-        'assets/img/5_endboss/Walk_003.png',
-        'assets/img/5_endboss/Walk_004.png',
-        'assets/img/5_endboss/Walk_005.png',
-        'assets/img/5_endboss/Walk_006.png',
-        'assets/img/5_endboss/Walk_007.png',
-        'assets/img/5_endboss/Walk_008.png',
-        'assets/img/5_endboss/Walk_009.png',
-    ];
 
     IMAGES_IDLE = [
         'assets/img/5_endboss/Idle_000.png',
@@ -96,6 +86,7 @@ class Endboss extends MovableObjects {
 
     lastAttackTime = 0;
     lastPlayerAttackTime = 0;
+    hasAppliedAttackDamage = false;
     energy = 100;
 
     attackCooldown = 2600;
@@ -106,12 +97,14 @@ class Endboss extends MovableObjects {
     hurtDuration = 500;
     animationInterval = 140;
 
+    /**
+     * @param {number} [x=2000] Initial x position.
+     */
     constructor(x = 2000) {
         super();
         this.loadImage(this.IMAGES_IDLE[0]);
         this.loadImages([
             ...this.IMAGES_IDLE,
-            ...this.IMAGES_WALKING,
             ...this.IMAGES_RUN,
             ...this.IMAGES_ATTACK,
             ...this.IMAGES_HURT,
@@ -129,6 +122,11 @@ class Endboss extends MovableObjects {
         this.animate();
     }
 
+    /**
+     * Sets the boss state and synchronizes compatibility flags.
+     * @param {'idle'|'run'|'attack'|'hurt'|'dead'|'awakening'} nextState Target state.
+     * @returns {boolean} True when state changed.
+     */
     setState(nextState) {
         if (this.state === 'dead' && nextState !== 'dead') return false;
         if (this.state === nextState) return false;
@@ -140,10 +138,18 @@ class Endboss extends MovableObjects {
         return true;
     }
 
+    /**
+     * Checks whether the boss is currently in the given state.
+     * @param {string} state State to compare.
+     * @returns {boolean} True when current state matches.
+     */
     isState(state) {
         return this.state === state;
     }
 
+    /**
+     * Mirrors explicit state into legacy boolean flags used by other systems.
+     */
     syncFlagsWithState() {
         this.isAwakening = this.state === 'awakening';
         this.isAttacking = this.state === 'attack';
@@ -155,6 +161,9 @@ class Endboss extends MovableObjects {
         }
     }
 
+    /**
+     * Starts the sprite animation loop.
+     */
     animate() {
         gameSetInterval(() => {
             const frames = this.getCurrentFrames();
@@ -171,6 +180,10 @@ class Endboss extends MovableObjects {
         }, this.animationInterval);
     }
 
+    /**
+     * Advances dead animation until the final frame and marks it as finished.
+     * @param {number} frameCount Number of available dead frames.
+     */
     updateDeadAnimation(frameCount) {
         if (this.deadAnimationFinished) return;
 
@@ -182,6 +195,10 @@ class Endboss extends MovableObjects {
         this.deadAnimationFinished = true;
     }
 
+    /**
+     * Draws the current boss sprite with optional horizontal mirroring.
+     * @param {CanvasRenderingContext2D} ctx Render context.
+     */
     draw(ctx) {
         if (!this.img) return;
 
@@ -199,6 +216,10 @@ class Endboss extends MovableObjects {
         }
     }
 
+    /**
+     * Returns animation frame set for the current state.
+     * @returns {string[]} Frame path list.
+     */
     getCurrentFrames() {
         switch (this.state) {
             case 'dead':
@@ -217,6 +238,9 @@ class Endboss extends MovableObjects {
         }
     }
 
+    /**
+     * Activates the encounter and plays awakening state before idle.
+     */
     activate() {
         if (this.isActivated || this.isState('awakening') || this.isState('dead')) return;
 
@@ -229,6 +253,10 @@ class Endboss extends MovableObjects {
         }, 1200);
     }
 
+    /**
+     * Updates behavior state machine according to player position and current boss state.
+     * @param {{x:number, width:number}} character Player character.
+     */
     updateBehavior(character) {
         if (!this.isActivated) return;
         if (this.isState('awakening') || this.isState('dead') || this.isState('hurt')) return;
@@ -238,7 +266,7 @@ class Endboss extends MovableObjects {
         this.otherDirection = distanceToCharacter < 0;
 
         if (this.isRecovering) {
-            this.setState('idle');
+            this.moveTowardsCharacter(distanceToCharacter);
             return;
         }
 
@@ -250,6 +278,10 @@ class Endboss extends MovableObjects {
         this.moveTowardsCharacter(distanceToCharacter);
     }
 
+    /**
+     * Moves boss toward the character until stop distance is reached.
+     * @param {number} distanceToCharacter Signed center-to-center x distance.
+     */
     moveTowardsCharacter(distanceToCharacter) {
         if (Math.abs(distanceToCharacter) <= this.chaseStopDistance) {
             this.setState('idle');
@@ -266,30 +298,53 @@ class Endboss extends MovableObjects {
         this.x += this.speed;
     }
 
+    /**
+     * Checks whether a new attack should start based on distance and cooldown.
+     * @param {{x:number, width:number}} character Player character.
+     * @returns {boolean} True when boss should attack.
+     */
     shouldAttack(character) {
         if (!this.canAttack()) return false;
         return Math.abs(this.getDistanceToCharacter(character)) <= this.attackRange;
     }
 
+    /**
+     * Computes signed x distance from boss center to character center.
+     * @param {{x:number, width:number}} character Player character.
+     * @returns {number} Signed distance in pixels.
+     */
     getDistanceToCharacter(character) {
         const characterCenterX = this.getCharacterCenterX(character);
         const bossCenterX = this.x + this.width / 2;
         return characterCenterX - bossCenterX;
     }
 
+    /**
+     * Returns character center x coordinate.
+     * @param {{x:number, width?:number}} character Player character.
+     * @returns {number} Center x coordinate.
+     */
     getCharacterCenterX(character) {
         return character.x + (character.width ?? 0) / 2;
     }
 
+    /**
+     * Checks whether attack cooldown and recovery rules allow an attack.
+     * @returns {boolean} True when attack is allowed.
+     */
     canAttack() {
         return !this.isRecovering && Date.now() - this.lastAttackTime >= this.attackCooldown;
     }
 
+    /**
+     * Starts one boss attack sequence with recovery phase.
+     */
     attack() {
         if (this.isState('attack') || this.isState('dead') || this.isState('awakening') || this.isRecovering) return;
 
         this.setState('attack');
         this.lastAttackTime = Date.now();
+        this.hasAppliedAttackDamage = false;
 
         gameSetTimeout(() => {
             if (this.isState('dead')) return;
@@ -311,6 +366,20 @@ class Endboss extends MovableObjects {
         }, this.attackDuration);
     }
 
+    /**
+     * Allows exactly one successful damage application per attack state.
+     * @returns {boolean}
+     */
+    tryConsumeAttackDamage() {
+        if (!this.isState('attack') || this.hasAppliedAttackDamage) return false;
+        this.hasAppliedAttackDamage = true;
+        return true;
+    }
+
+    /**
+     * Builds the boss melee attack collision box.
+     * @returns {{x:number, y:number, width:number, height:number, offset:{top:number,right:number,bottom:number,left:number}}}
+     */
     getAttackBox() {
         const attackWidth = 145;
         const attackHeight = this.height - 70;
@@ -333,6 +402,11 @@ class Endboss extends MovableObjects {
         };
     }
 
+    /**
+     * Applies incoming damage and handles hurt/death transitions.
+     * @param {number} [damage=25] Incoming damage amount.
+     * @param {number|string} [attackTime=0] Unique identifier to deduplicate same player attack.
+     */
     takeHit(damage = 25, attackTime = 0) {
         if (this.isState('dead') || this.lastPlayerAttackTime === attackTime) return;
 

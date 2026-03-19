@@ -1,3 +1,6 @@
+/**
+ * Ground enemy with single-hit health and walking animation.
+ */
 class Orc extends MovableObjects {
     offset = {
         top: 18,
@@ -34,6 +37,9 @@ class Orc extends MovableObjects {
     ];
     remainingHealth = 1;
 
+    /**
+     * @param {number} [x=500 + Math.random() * 900] Initial x position.
+     */
     constructor(x = 500 + Math.random() * 900) {
         super();
         this.loadImage(this.IMAGES_WALKING[0]);
@@ -46,6 +52,9 @@ class Orc extends MovableObjects {
         this.animate();
     }
 
+    /**
+     * Starts movement and frame animation loops.
+     */
     animate() {
         gameSetInterval(() => {
             this.moveLeft();

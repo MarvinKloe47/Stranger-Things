@@ -1,7 +1,15 @@
+/**
+ * Main game world orchestrating entities, collisions, rendering, and game state.
+ */
 class World {
     coinStorageKey = "stranger-things-coins";
     specialStorageKey = "stranger-things-special-unlocked";
 
+    /**
+     * @param {HTMLCanvasElement} canvas Target canvas.
+     * @param {Keyboard} keyboard Shared keyboard state.
+     * @param {{audioManager?: AudioManager|null, onShopUiChange?: Function|null, onGameEnd?: Function|null}} [options={}] Optional world integrations.
+     */
     constructor(canvas, keyboard, options = {}) {
         this.ctx = canvas.getContext("2d");
         this.keyboard = keyboard;
@@ -36,6 +44,9 @@ class World {
         this.draw();
     }
 
+    /**
+     * Wires initial world references and loads persisted player progress.
+     */
     configureScene() {
         this.character.world = this;
         this.character.alignToGround(this.groundY);
@@ -47,6 +58,10 @@ class World {
         this.onShopUiChange?.();
     }
 
+    /**
+     * Loads stored coin count from local storage.
+     * @returns {number} Valid non-negative coin count.
+     */
     loadStoredCoins() {
         try {
             const storedCoins = localStorage.getItem(this.coinStorageKey);
@@ -57,6 +72,9 @@ class World {
         }
     }
 
+    /**
+     * Persists current coin count to local storage.
+     */
     saveStoredCoins() {
         try {
             localStorage.setItem(this.coinStorageKey, String(this.character.coins));
@@ -65,6 +83,10 @@ class World {
         }
     }
 
+    /**
+     * Loads the persisted special ability unlock flag.
+     * @returns {boolean} True when special ability is unlocked.
+     */
     loadSpecialUnlocked() {
         try {
             return localStorage.getItem(this.specialStorageKey) === "true";
@@ -73,6 +95,9 @@ class World {
         }
     }
 
+    /**
+     * Starts the gameplay update loop.
+     */
     run() {
         gameSetInterval(() => {
             if (this.gameFinished || this.isDisposed) return;
@@ -87,6 +112,9 @@ class World {
         }, 1000 / 60);
     }
 
+    /**
+     * Draw loop for world and HUD rendering.
+     */
     draw() {
         if (this.isDisposed) return;
         this.ctx.clearRect(0, 0, this.worldWidth, this.worldHeight);
@@ -108,6 +136,9 @@ class World {
         gameRequestAnimationFrame(() => this.draw());
     }
 
+    /**
+     * Marks the world as disposed and stops future gameplay progression.
+     */
     dispose() {
         this.gameFinished = true;
         this.isDisposed = true;
@@ -121,8 +152,11 @@ class World {
             const isActiveEndboss = enemy instanceof Endboss && enemy.isActivated;
             const isEndbossAttack = isActiveEndboss && enemy.isAttacking;
             const isRegularEnemyTouch = !isActiveEndboss && this.isColliding(this.character, enemy);
+            const isBossAttackHit = isEndbossAttack
+                && this.isColliding(this.character, enemy.getAttackBox())
+                && enemy.tryConsumeAttackDamage();
             const hitsCharacter = isRegularEnemyTouch
-                || (isEndbossAttack && this.isColliding(this.character, enemy.getAttackBox()));
+                || isBossAttackHit;
 
             if (!hitsCharacter || !this.canTakeDamage()) return;
             this.character.lastHit = Date.now();

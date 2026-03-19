@@ -1,3 +1,6 @@
+/**
+ * Ground enemy that walks from right to left and requires multiple hits.
+ */
 class Demogorgon extends MovableObjects 
 {
     offset = {
@@ -19,6 +22,9 @@ class Demogorgon extends MovableObjects
         ];
     remainingHealth = 2;
 
+    /**
+     * @param {number} [x=700] Initial x position.
+     */
     constructor(x = 700) {
         super();
         this.loadImage("assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
@@ -32,6 +38,9 @@ class Demogorgon extends MovableObjects
     }
 
 
+    /**
+     * Starts movement and frame animation loops.
+     */
      animate() {
         gameSetInterval(() => {
             this.moveLeft();

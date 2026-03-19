@@ -1,3 +1,6 @@
+/**
+ * Base drawable entity with image loading, rendering, and debug box support.
+ */
 class DrawableObject {
     static debugMode = false;
 
@@ -10,11 +13,19 @@ class DrawableObject {
     currentImageIndex = 0;
     otherDirection = false;
 
+    /**
+     * Loads a single image and assigns it as current sprite.
+     * @param {string} path Image path.
+     */
     loadImage(path) {
         this.img = new Image();
         this.img.src = path;
     }
 
+    /**
+     * Preloads multiple images into the internal cache.
+     * @param {string[]} arr Image paths.
+     */
     loadImages(arr) {
         arr.forEach((path) => {
             let img = new Image();
@@ -23,11 +34,20 @@ class DrawableObject {
         });
     }
 
+    /**
+     * Updates render size for this object.
+     * @param {number} width Render width.
+     * @param {number} height Render height.
+     */
     setSize(width, height) {
         this.width = width;
         this.height = height;
     }
 
+    /**
+     * Draws the current sprite and mirrors it when facing left.
+     * @param {CanvasRenderingContext2D} ctx Render context.
+     */
     draw(ctx) {
         if (!this.img) return;
 
@@ -45,6 +65,10 @@ class DrawableObject {
         }
     }
 
+    /**
+     * Draws collision debug rectangle when debug mode is enabled.
+     * @param {CanvasRenderingContext2D} ctx Render context.
+     */
     drawDebugRect(ctx) {
         if (!DrawableObject.debugMode) return;
 

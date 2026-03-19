@@ -1,3 +1,6 @@
+/**
+ * Main playable character with movement, combat, animation, and cooldown states.
+ */
 class Character extends MovableObjects {
 
     world;
@@ -51,6 +54,9 @@ class Character extends MovableObjects {
     attackDuration = 300;
     attackCooldown = 900;
 
+    /**
+     * Creates the character, loads sprite assets, and starts animation loops.
+     */
     constructor() {
         super();
         this.loadImage(this.SPRITE_WALK);
@@ -68,22 +74,37 @@ class Character extends MovableObjects {
         this.animate();
     }
 
+    /**
+     * Aligns the character to ground while applying its configured y offset.
+     * @param {number} [groundY=this.groundY] Ground y coordinate.
+     */
     alignToGround(groundY = this.groundY) {
         super.alignToGround(groundY - this.yOffset);
     }
 
+    /**
+     * Checks if the character is currently airborne.
+     * @returns {boolean} True if above ground.
+     */
     isAboveGround() {
         return this.y < (this.groundY - this.yOffset - this.height);
     }
 
+    /**
+     * Updates y offset and realigns to ground.
+     * @param {number} offset Vertical offset from the ground line.
+     */
     setYOffset(offset) {
         this.yOffset = offset;
         this.alignToGround();
     }
 
+    /**
+     * Starts movement/input and animation frame update loops.
+     */
     animate() {
 
-        // Bewegung + Kamera
+        
         gameSetInterval(() => {
             if (this.isDead) {
                 this.updateAttackState();
@@ -118,7 +139,7 @@ class Character extends MovableObjects {
             this.world.camera_x = -this.x;
         }, 1000 / 30);
 
-        // Laufanimation (Frames wechseln)
+       
         gameSetInterval(() => {
             const isMoving = this.world?.keyboard &&
                 (this.world.keyboard.RIGHT || this.world.keyboard.LEFT);
@@ -153,6 +174,9 @@ class Character extends MovableObjects {
         }, this.frameInterval);
     }
 
+    /**
+     * Switches to walk animation sprite.
+     */
     activateWalkAnimation() {
         if (this.currentAnimation === "walk") return;
         this.img = this.imageCache[this.SPRITE_WALK] || this.img;
@@ -161,6 +185,9 @@ class Character extends MovableObjects {
         this.currentAnimation = "walk";
     }
 
+    /**
+     * Switches to jump animation sprite.
+     */
     activateJumpAnimation() {
         if (this.currentAnimation === "jump") return;
         const jumpSprite = this.IMAGES_JUMP[0];
@@ -170,6 +197,9 @@ class Character extends MovableObjects {
         this.currentAnimation = "jump";
     }
 
+    /**
+     * Switches to hurt animation sprite.
+     */
     activateHurtAnimation() {
         if (this.currentAnimation === "hurt") return;
         this.img = this.imageCache[this.SPRITE_HURT] || this.img;
@@ -178,6 +208,9 @@ class Character extends MovableObjects {
         this.currentAnimation = "hurt";
     }
 
+    /**
+     * Switches to dead animation sprite.
+     */
     activateDeadAnimation() {
         if (this.currentAnimation === "dead") return;
         this.img = this.imageCache[this.SPRITE_DEAD] || this.img;
@@ -186,6 +219,9 @@ class Character extends MovableObjects {
         this.currentAnimation = "dead";
     }
 
+    /**
+     * Switches to attack animation sprite.
+     */
     activateAttackAnimation() {
         if (this.currentAnimation === "attack") return;
         this.img = this.imageCache[this.SPRITE_ATTACK] || this.img;
@@ -194,6 +230,10 @@ class Character extends MovableObjects {
         this.currentAnimation = "attack";
     }
 
+    /**
+     * Draws the current character frame, including horizontal flip when facing left.
+     * @param {CanvasRenderingContext2D} ctx Render context.
+     */
     draw(ctx) {
         if (!this.img || !this.img.complete || this.img.naturalWidth === 0) return;
 
@@ -205,7 +245,6 @@ class Character extends MovableObjects {
         ctx.save();
 
         if (this.otherDirection) {
-            // Spiegeln nach links
             ctx.translate(this.x + this.width, this.y);
             ctx.scale(-1, 1);
 
@@ -237,11 +276,17 @@ class Character extends MovableObjects {
         ctx.restore();
     }
 
+    /**
+     * Triggers a jump impulse and jump sound.
+     */
     jump() {
         this.speedY = 20;
         this.world?.audioManager?.playJumpSound();
     }
 
+    /**
+     * Backward-compatible attack entry point.
+     */
     attack() {
         this.startAttack();
     }
@@ -339,19 +384,35 @@ class Character extends MovableObjects {
         this.attackedTargetsInCurrentAttack.add(target);
     }
 
+    /**
+     * Checks whether the attack cooldown has elapsed.
+     * @returns {boolean} True if a new attack can be triggered.
+     */
     canAttack() {
         return Date.now() - this.lastAttackTime >= this.attackCooldown;
     }
 
+    /**
+     * Returns normalized attack cooldown progress.
+     * @returns {number} Value between 0 and 1.
+     */
     getAttackCooldownProgress() {
         const elapsed = Date.now() - this.lastAttackTime;
         return Math.max(0, Math.min(1, elapsed / this.attackCooldown));
     }
 
+    /**
+     * Checks if the character can currently use the special ability.
+     * @returns {boolean} True if unlocked and cooldown is ready.
+     */
     canUseSpecial() {
         return this.specialUnlocked && !this.isDead && Date.now() - this.lastSpecialTime >= this.specialCooldown;
     }
 
+    /**
+     * Attempts to activate the special ability and start its cooldown.
+     * @returns {boolean} True when the special was activated.
+     */
     activateSpecial() {
         if (!this.canUseSpecial()) return false;
 
@@ -359,6 +420,10 @@ class Character extends MovableObjects {
         return true;
     }
 
+    /**
+     * Returns normalized special cooldown progress.
+     * @returns {number} Value between 0 and 1.
+     */
     getSpecialCooldownProgress() {
         if (!this.specialUnlocked) return 0;
 
@@ -366,6 +431,10 @@ class Character extends MovableObjects {
         return Math.max(0, Math.min(1, elapsed / this.specialCooldown));
     }
 
+    /**
+     * Builds the active melee attack collision box.
+     * @returns {{x:number, y:number, width:number, height:number, offset:{top:number,right:number,bottom:number,left:number}}}
+     */
     getAttackBox() {
         const attackWidth = 42;
         const attackHeight = this.height - 90;

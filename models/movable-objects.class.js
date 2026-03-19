@@ -1,3 +1,6 @@
+/**
+ * Base class for drawable objects that can move and be affected by gravity.
+ */
 class MovableObjects extends DrawableObject
 {
     groundY = 400;
@@ -11,6 +14,9 @@ class MovableObjects extends DrawableObject
         left: 0,
     };
 
+    /**
+     * Applies gravity simulation to this object.
+     */
     applyGravity() {
         gameSetInterval(() => {
             if (this.isAboveGround() || this.speedY > 0)  {
@@ -22,20 +28,35 @@ class MovableObjects extends DrawableObject
             }
         }, 1000 / 60);
     }
+
+    /**
+     * Checks whether the object is above ground.
+     * @returns {boolean} True if the object is airborne.
+     */
     isAboveGround() {
         return this.y < this.groundY - this.height;
     }
 
+    /**
+     * Aligns the object to the given ground line.
+     * @param {number} [groundY=this.groundY] Ground y coordinate.
+     */
     alignToGround(groundY = this.groundY)
     {
         this.y = groundY - this.height;
     }
     
+    /**
+     * Moves the object to the right by current speed.
+     */
     moveRight()
     {
         this.x += this.speed;
     }
 
+    /**
+     * Moves the object to the left by current speed.
+     */
     moveLeft()
     {
         this.x -= this.speed;

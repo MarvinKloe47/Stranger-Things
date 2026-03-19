@@ -1,6 +1,12 @@
+/**
+ * Handles background music, sound effects, and persisted mute state.
+ */
 class AudioManager {
     storageKey = "stranger-things-music-muted";
 
+    /**
+     * @param {string} loopPath Path to the looping background track.
+     */
     constructor(loopPath) {
         this.backgroundLoop = new Audio(loopPath);
         this.jumpSound = new Audio("assets/audio/jump.mp3");
@@ -21,6 +27,10 @@ class AudioManager {
         this.applyMuteState();
     }
 
+    /**
+     * Reads the saved mute preference from local storage.
+     * @returns {boolean} True when audio should start muted.
+     */
     loadMutedPreference() {
         try {
             return localStorage.getItem(this.storageKey) === "true";
@@ -29,6 +39,9 @@ class AudioManager {
         }
     }
 
+    /**
+     * Persists the current mute preference.
+     */
     saveMutedPreference() {
         try {
             localStorage.setItem(this.storageKey, String(this.isMuted));
@@ -37,6 +50,9 @@ class AudioManager {
         }
     }
 
+    /**
+     * Applies the current mute state to all managed audio instances.
+     */
     applyMuteState() {
         this.backgroundLoop.muted = this.isMuted;
         this.jumpSound.muted = this.isMuted;
@@ -47,6 +63,10 @@ class AudioManager {
         this.evilLaughSound.muted = this.isMuted;
     }
 
+    /**
+     * Toggles global mute state and persists it.
+     * @returns {boolean} The new mute state.
+     */
     toggleMute() {
         this.isMuted = !this.isMuted;
         this.applyMuteState();
@@ -54,6 +74,9 @@ class AudioManager {
         return this.isMuted;
     }
 
+    /**
+     * Starts the looping background music.
+     */
     playBackgroundLoop() {
         this.applyMuteState();
         this.backgroundLoop.play().catch(() => {
@@ -61,34 +84,59 @@ class AudioManager {
         });
     }
 
+    /**
+     * Stops the looping background music.
+     */
     stopBackgroundLoop() {
         this.backgroundLoop.pause();
     }
 
+    /**
+     * Plays the jump sound effect.
+     */
     playJumpSound() {
         this.playEffect(this.jumpSound);
     }
 
+    /**
+     * Plays the hurt sound effect.
+     */
     playHurtSound() {
         this.playEffect(this.hurtSound);
     }
 
+    /**
+     * Plays the collect sound effect.
+     */
     playCollectSound() {
         this.playEffect(this.collectSound);
     }
 
+    /**
+     * Plays the attack sound effect.
+     */
     playAttackSound() {
         this.playEffect(this.attackSound);
     }
 
+    /**
+     * Plays the evil laugh sound effect.
+     */
     playEvilLaughSound() {
         this.playEffect(this.evilLaughSound);
     }
 
+    /**
+     * Plays the laser sound effect.
+     */
     playLaserSound() {
         this.playEffect(this.laserSound);
     }
 
+    /**
+     * Plays a one-shot sound from the beginning.
+     * @param {HTMLAudioElement} audio Audio element to play.
+     */
     playEffect(audio) {
         audio.currentTime = 0;
         audio.muted = this.isMuted;

@@ -1,3 +1,6 @@
+/**
+ * Represents current pressed state for all relevant game controls.
+ */
 class Keyboard {
     LEFT = false;
     RIGHT = false;

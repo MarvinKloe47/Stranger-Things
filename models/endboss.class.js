@@ -5,18 +5,20 @@ class Endboss extends MovableObjects {
         bottom: 20,
         left: 72,
     };
+
     IMAGES_WALKING = [
         'assets/img/5_endboss/Walk_000.png',
         'assets/img/5_endboss/Walk_001.png',
         'assets/img/5_endboss/Walk_002.png',
         'assets/img/5_endboss/Walk_003.png',
-        'assets/img/5_endboss/Walk_004.png',   
+        'assets/img/5_endboss/Walk_004.png',
         'assets/img/5_endboss/Walk_005.png',
         'assets/img/5_endboss/Walk_006.png',
         'assets/img/5_endboss/Walk_007.png',
         'assets/img/5_endboss/Walk_008.png',
         'assets/img/5_endboss/Walk_009.png',
     ];
+
     IMAGES_IDLE = [
         'assets/img/5_endboss/Idle_000.png',
         'assets/img/5_endboss/Idle_001.png',
@@ -29,6 +31,7 @@ class Endboss extends MovableObjects {
         'assets/img/5_endboss/Idle_008.png',
         'assets/img/5_endboss/Idle_009.png',
     ];
+
     IMAGES_RUN = [
         'assets/img/5_endboss/Run_000.png',
         'assets/img/5_endboss/Run_001.png',
@@ -41,6 +44,7 @@ class Endboss extends MovableObjects {
         'assets/img/5_endboss/Run_008.png',
         'assets/img/5_endboss/Run_009.png',
     ];
+
     IMAGES_ATTACK = [
         'assets/img/5_endboss/Attack_000.png',
         'assets/img/5_endboss/Attack_001.png',
@@ -53,6 +57,7 @@ class Endboss extends MovableObjects {
         'assets/img/5_endboss/Attack_008.png',
         'assets/img/5_endboss/Attack_009.png',
     ];
+
     IMAGES_HURT = [
         'assets/img/5_endboss/Hurt_000.png',
         'assets/img/5_endboss/Hurt_001.png',
@@ -65,6 +70,7 @@ class Endboss extends MovableObjects {
         'assets/img/5_endboss/Hurt_008.png',
         'assets/img/5_endboss/Hurt_009.png',
     ];
+
     IMAGES_DEAD = [
         'assets/img/5_endboss/Dead_000.png',
         'assets/img/5_endboss/Dead_001.png',
@@ -77,6 +83,8 @@ class Endboss extends MovableObjects {
         'assets/img/5_endboss/Dead_008.png',
         'assets/img/5_endboss/Dead_009.png',
     ];
+
+    state = 'idle';
     isActivated = false;
     isAwakening = false;
     isAttacking = false;
@@ -85,14 +93,15 @@ class Endboss extends MovableObjects {
     isRecovering = false;
     deadAnimationFinished = false;
     currentAnimation = 'idle';
+
     lastAttackTime = 0;
     lastPlayerAttackTime = 0;
     energy = 100;
+
     attackCooldown = 2600;
     attackDuration = 650;
-    attackRange = 120;
-    chaseRange = 230;
-    retreatRange = 135;
+    attackRange = 220;
+    chaseStopDistance = 24;
     recoveryDuration = 950;
     hurtDuration = 500;
     animationInterval = 140;
@@ -108,29 +117,53 @@ class Endboss extends MovableObjects {
             ...this.IMAGES_HURT,
             ...this.IMAGES_DEAD,
         ]);
+
         this.x = x;
         this.y = 50;
         this.width = 250;
         this.height = 250;
         this.speed = 1.15;
         this.otherDirection = true;
+
+        this.syncFlagsWithState();
         this.animate();
+    }
+
+    setState(nextState) {
+        if (this.state === 'dead' && nextState !== 'dead') return false;
+        if (this.state === nextState) return false;
+
+        this.state = nextState;
+        this.currentAnimation = nextState;
+        this.currentImageIndex = 0;
+        this.syncFlagsWithState();
+        return true;
+    }
+
+    isState(state) {
+        return this.state === state;
+    }
+
+    syncFlagsWithState() {
+        this.isAwakening = this.state === 'awakening';
+        this.isAttacking = this.state === 'attack';
+        this.isHurt = this.state === 'hurt';
+        this.isDead = this.state === 'dead';
+
+        if (this.isDead) {
+            this.isActivated = false;
+        }
     }
 
     animate() {
         gameSetInterval(() => {
             const frames = this.getCurrentFrames();
-            const i = this.currentImageIndex % frames.length;
-            const path = frames[i];
+            const index = this.currentImageIndex % frames.length;
+            const path = frames[index];
             this.img = this.imageCache[path];
-            if (this.isDead) {
-                if (!this.deadAnimationFinished) {
-                    if (this.currentImageIndex < frames.length - 1) {
-                        this.currentImageIndex++;
-                    } else {
-                        this.deadAnimationFinished = true;
-                    }
-                }
+
+            if (this.isState('dead')) {
+                this.updateDeadAnimation(frames.length);
                 return;
             }
 
@@ -138,59 +171,114 @@ class Endboss extends MovableObjects {
         }, this.animationInterval);
     }
 
+    updateDeadAnimation(frameCount) {
+        if (this.deadAnimationFinished) return;
+
+        if (this.currentImageIndex < frameCount - 1) {
+            this.currentImageIndex++;
+            return;
+        }
+
+        this.deadAnimationFinished = true;
+    }
+
+    draw(ctx) {
+        if (!this.img) return;
+
+        if (this.otherDirection) {
+            ctx.save();
+            ctx.translate(this.x + this.width / 2, 0);
+            ctx.scale(-1, 1);
+            ctx.translate(-this.x - this.width / 2, 0);
+        }
+
+        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+
+        if (this.otherDirection) {
+            ctx.restore();
+        }
+    }
+
     getCurrentFrames() {
-        if (this.isDead) return this.IMAGES_DEAD;
-        if (this.isHurt) return this.IMAGES_HURT;
-        if (this.isAttacking) return this.IMAGES_ATTACK;
-        if (this.isActivated) return this.IMAGES_RUN;
-        return this.IMAGES_IDLE;
+        switch (this.state) {
+            case 'dead':
+                return this.IMAGES_DEAD;
+            case 'hurt':
+                return this.IMAGES_HURT;
+            case 'attack':
+                return this.IMAGES_ATTACK;
+            case 'awakening':
+                return this.IMAGES_IDLE;
+            case 'run':
+                return this.IMAGES_RUN;
+            case 'idle':
+            default:
+                return this.IMAGES_IDLE;
+        }
     }
 
     activate() {
-        if (this.isActivated || this.isAwakening) return;
+        if (this.isActivated || this.isState('awakening') || this.isState('dead')) return;
 
-        this.isAwakening = true;
-        this.currentImageIndex = 0;
+        this.isActivated = true;
+        this.setState('awakening');
 
         gameSetTimeout(() => {
-            this.isAwakening = false;
-            this.isActivated = true;
-            this.currentAnimation = 'run';
-            this.currentImageIndex = 0;
+            if (this.isState('dead')) return;
+            this.setState('idle');
         }, 1200);
     }
 
     updateBehavior(character) {
-        if (!this.isActivated || this.isAwakening || this.isDead || this.isHurt) return;
+        if (!this.isActivated) return;
+        if (this.isState('awakening') || this.isState('dead') || this.isState('hurt')) return;
+        if (this.isState('attack')) return;
 
-        const distanceToCharacter = character.x - this.x;
-        const absoluteDistance = Math.abs(distanceToCharacter);
+        const distanceToCharacter = this.getDistanceToCharacter(character);
         this.otherDirection = distanceToCharacter < 0;
 
-        if (this.isAttacking) return;
-
         if (this.isRecovering) {
-            this.repositionAfterAttack(distanceToCharacter);
+            this.setState('idle');
             return;
         }
 
-        if (absoluteDistance <= this.attackRange && this.canAttack()) {
+        if (this.shouldAttack(character)) {
             this.attack();
             return;
         }
 
-        if (absoluteDistance < this.retreatRange) {
-            this.repositionAfterAttack(distanceToCharacter);
+        this.moveTowardsCharacter(distanceToCharacter);
+    }
+
+    moveTowardsCharacter(distanceToCharacter) {
+        if (Math.abs(distanceToCharacter) <= this.chaseStopDistance) {
+            this.setState('idle');
             return;
         }
 
-        if (absoluteDistance <= this.chaseRange) return;
+        this.setState('run');
 
-        if (distanceToCharacter < -8) {
+        if (distanceToCharacter < 0) {
             this.x -= this.speed;
-        } else if (distanceToCharacter > 8) {
-            this.x += this.speed;
+            return;
         }
+
+        this.x += this.speed;
+    }
+
+    shouldAttack(character) {
+        if (!this.canAttack()) return false;
+        return Math.abs(this.getDistanceToCharacter(character)) <= this.attackRange;
+    }
+
+    getDistanceToCharacter(character) {
+        const characterCenterX = this.getCharacterCenterX(character);
+        const bossCenterX = this.x + this.width / 2;
+        return characterCenterX - bossCenterX;
+    }
+
+    getCharacterCenterX(character) {
+        return character.x + (character.width ?? 0) / 2;
     }
 
     canAttack() {
@@ -198,40 +286,38 @@ class Endboss extends MovableObjects {
     }
 
     attack() {
-        if (this.isAttacking || this.isDead || this.isRecovering) return;
+        if (this.isState('attack') || this.isState('dead') || this.isState('awakening') || this.isRecovering) return;
 
-        this.isAttacking = true;
+        this.setState('attack');
         this.lastAttackTime = Date.now();
-        this.currentImageIndex = 0;
 
         gameSetTimeout(() => {
-            this.isAttacking = false;
+            if (this.isState('dead')) return;
+
+            if (this.isState('attack')) {
+                this.setState('idle');
+            }
+
             this.isRecovering = true;
-            this.currentImageIndex = 0;
 
             gameSetTimeout(() => {
+                if (this.isState('dead')) return;
                 this.isRecovering = false;
+
+                if (!this.isState('hurt') && !this.isState('attack')) {
+                    this.setState('idle');
+                }
             }, this.recoveryDuration);
         }, this.attackDuration);
     }
 
-    repositionAfterAttack(distanceToCharacter) {
-        const retreatSpeed = this.speed * 0.8;
-
-        if (distanceToCharacter < 0) {
-            this.x += retreatSpeed;
-        } else {
-            this.x -= retreatSpeed;
-        }
-    }
-
     getAttackBox() {
-        const attackWidth = 90;
-        const attackHeight = this.height - 85;
-        const attackY = this.y + 35;
+        const attackWidth = 145;
+        const attackHeight = this.height - 70;
+        const attackY = this.y + 24;
         const attackX = this.otherDirection
-            ? this.x - attackWidth + 40
-            : this.x + this.width - 40;
+            ? this.x - attackWidth + 20
+            : this.x + this.width - 20;
 
         return {
             x: attackX,
@@ -248,28 +334,25 @@ class Endboss extends MovableObjects {
     }
 
     takeHit(damage = 25, attackTime = 0) {
-        if (this.isDead || this.lastPlayerAttackTime === attackTime) return;
+        if (this.isState('dead') || this.lastPlayerAttackTime === attackTime) return;
 
         this.lastPlayerAttackTime = attackTime;
         this.energy = Math.max(0, this.energy - damage);
-        this.isHurt = true;
-        this.isAttacking = false;
         this.isRecovering = true;
-        this.currentImageIndex = 0;
 
         if (this.energy === 0) {
-            this.isDead = true;
-            this.isActivated = false;
-            this.isHurt = false;
+            this.setState('dead');
             this.isRecovering = false;
-            this.currentImageIndex = 0;
+            this.deadAnimationFinished = false;
             return;
         }
 
+        this.setState('hurt');
+
         gameSetTimeout(() => {
-            this.isHurt = false;
-            this.currentImageIndex = 0;
+            if (this.isState('dead')) return;
             this.isRecovering = false;
+            this.setState('idle');
         }, this.hurtDuration);
     }
 }

@@ -53,6 +53,43 @@
 	flex-wrap: wrap;
 }
 
+.ingame-audio-button
+{
+	position: absolute;
+	top: 92px;
+	right: 16px;
+	z-index: 7;
+	padding: 0;
+	border-radius: 10px;
+	border: 0;
+	background: transparent !important;
+	box-shadow: none;
+	transition: none !important;
+	animation: none !important;
+}
+
+.ingame-audio-button img
+{
+	width: 30px;
+}
+
+.ingame-audio-button:hover,
+.ingame-audio-button:focus-visible,
+.ingame-audio-button:active
+{
+	background: transparent !important;
+	filter: none;
+	transform: none;
+	outline: none;
+	transition: none !important;
+	animation: none !important;
+}
+
+.start-screen:not(.hidden) ~ .ingame-audio-button
+{
+	display: none !important;
+}
+
 .end-screen
 {
 	position: fixed;

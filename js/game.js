@@ -6,6 +6,8 @@ let playButton;
 let shopButton;
 let musicButton;
 let musicButtonIcon;
+let ingameMusicButton;
+let ingameMusicButtonIcon;
 let infoModal;
 let controlsModal;
 let shopModal;
@@ -112,6 +114,8 @@ function cacheShopDom() {
  */
 function cacheExtendedDomElements() {
     shopUnlockedBanner = document.getElementById("shop-unlocked-banner");
+    ingameMusicButton = document.getElementById("ingame-music-button");
+    ingameMusicButtonIcon = document.getElementById("ingame-music-button-icon");
 }
 
 /**
@@ -121,6 +125,7 @@ function registerUiEvents() {
     playButton?.addEventListener("click", startGame);
     shopButton?.addEventListener("click", openShop);
     musicButton?.addEventListener("click", toggleMusic);
+    ingameMusicButton?.addEventListener("click", toggleMusic);
     restartButton?.addEventListener("click", restartGame);
     menuButton?.addEventListener("click", returnToMainMenu);
     buySpecialButton?.addEventListener("click", buySpecialAttack);
@@ -157,6 +162,7 @@ function createWorldSession() {
     });
     audioManager?.playBackgroundLoop();
     startScreen?.classList.add("hidden");
+    updateIngameMusicButtonVisibility();
 }
 
 /**
@@ -197,6 +203,7 @@ function updateOrientationOverlay() {
     rotateOverlay.classList.toggle("rotate-overlay--active", shouldShow);
     rotateOverlay.setAttribute("aria-hidden", shouldShow ? "false" : "true");
     mobileControls?.classList.toggle("hidden", shouldShow);
+    updateIngameMusicButtonVisibility();
 }
 
 /**

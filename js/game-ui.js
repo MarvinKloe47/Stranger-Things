@@ -3,16 +3,59 @@
  */
 function updateMusicButton() {
     const isMuted = audioManager?.isMuted ?? false;
+    const menuIconPath = isMuted
+        ? "assets/img/7_ProjectIMG/music_off.png"
+        : "assets/img/7_ProjectIMG/misic.png";
+    const ingameIconPath = isMuted
+        ? "assets/img/10_ingame_music/volume-off.png"
+        : "assets/img/10_ingame_music/volume-on.png";
+    const ariaLabel = isMuted ? "Music off" : "Music on";
+    updateMusicButtonIcon(musicButtonIcon, menuIconPath);
+    updateMusicButtonIcon(ingameMusicButtonIcon, ingameIconPath);
+    updateMusicButtonLabel(musicButton, ariaLabel);
+    updateMusicButtonLabel(ingameMusicButton, ariaLabel);
+}
 
-    if (musicButtonIcon) {
-        musicButtonIcon.src = isMuted
-            ? "assets/img/7_ProjectIMG/music_off.png"
-            : "assets/img/7_ProjectIMG/misic.png";
-    }
+/**
+ * Updates one music button icon source.
+ * @param {HTMLImageElement|null|undefined} iconElement Target icon element.
+ * @param {string} path Image source path.
+ */
+function updateMusicButtonIcon(iconElement, path) {
+    if (!iconElement) return;
+    iconElement.src = path;
+}
 
-    if (musicButton) {
-        musicButton.setAttribute("aria-label", isMuted ? "Music off" : "Music on");
-    }
+/**
+ * Updates one music button aria label.
+ * @param {HTMLButtonElement|null|undefined} button Button element.
+ * @param {string} label ARIA label text.
+ */
+function updateMusicButtonLabel(button, label) {
+    if (!button) return;
+    button.setAttribute("aria-label", label);
+}
+
+/**
+ * Toggles visibility of the in-game mute button.
+ */
+function updateIngameMusicButtonVisibility() {
+    if (!ingameMusicButton) return;
+    const hasWorld = !!world;
+    const onMenu = isStartScreenActive();
+    const onEndScreen = !!endScreen && !endScreen.classList.contains("hidden");
+    const hiddenForOrientation = !!rotateOverlay && !rotateOverlay.classList.contains("hidden");
+    const shouldShow = hasWorld && !onMenu && !onEndScreen && !hiddenForOrientation;
+    ingameMusicButton.classList.toggle("hidden", !shouldShow);
+}
+
+/**
+ * Returns true while the start screen overlay is visually active.
+ * @returns {boolean} Active start screen state.
+ */
+function isStartScreenActive() {
+    if (!startScreen) return false;
+    return !startScreen.classList.contains("hidden") && startScreen.getAttribute("aria-hidden") !== "true";
 }
 
 /**
@@ -203,6 +246,7 @@ function showEndScreen(type) {
     endScreenImage.alt = type === "win" ? "You win" : "You lost";
     endScreen.classList.remove("hidden");
     endScreen.setAttribute("aria-hidden", "false");
+    updateIngameMusicButtonVisibility();
 }
 
 /**
@@ -235,8 +279,16 @@ function resetGameSession(options) {
     hideEndScreen();
     updateStartScreenVisibility(options.returnToMenu);
     resetPlayButtonState();
+    refreshSessionUiState();
+}
+
+/**
+ * Refreshes UI fragments after a session reset.
+ */
+function refreshSessionUiState() {
     updateShopUi();
     updateOrientationOverlay();
+    updateIngameMusicButtonVisibility();
 }
 
 /**
@@ -255,6 +307,7 @@ function hideEndScreen() {
 function updateStartScreenVisibility(returnToMenu) {
     if (!startScreen) return;
     startScreen.classList.toggle("hidden", !returnToMenu);
+    updateIngameMusicButtonVisibility();
 }
 
 /**

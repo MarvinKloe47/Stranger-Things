@@ -33,6 +33,33 @@
 	transform: translateY(0);
 }
 
+.ingame-audio-button
+{
+	padding: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	transition: none !important;
+	animation: none !important;
+}
+
+.ingame-audio-button img
+{
+	width: 30px !important;
+	height: auto;
+}
+
+.ingame-audio-button:hover,
+.ingame-audio-button:focus-visible,
+.ingame-audio-button:active
+{
+	background: transparent !important;
+	filter: none !important;
+	transform: none !important;
+	transition: none !important;
+	animation: none !important;
+	outline: none;
+}
+
 .shop-modal__bg
 {
 	display: block;

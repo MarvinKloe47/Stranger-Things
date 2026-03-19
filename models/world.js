@@ -73,12 +73,21 @@ class World {
     configureScene() {
         this.character.world = this;
         this.character.alignToGround(this.groundY);
-        this.enemies.forEach((enemy) => enemy.alignToGround(this.groundY));
+        this.enemies.forEach((enemy) => this.configureEnemy(enemy));
         this.character.coins = this.loadStoredCoins();
         this.character.specialUnlocked = this.loadSpecialUnlocked();
         this.coinCounter.setValue(this.character.coins);
         this.bossStatusBar.setPercentage(this.endboss?.energy ?? 100);
         this.onShopUiChange?.();
+    }
+
+    /**
+     * Applies initial world references and positioning for one enemy.
+     * @param {MovableObjects} enemy Enemy instance.
+     */
+    configureEnemy(enemy) {
+        enemy.world = this;
+        enemy.alignToGround(this.groundY);
     }
 
     /**
@@ -131,8 +140,28 @@ class World {
             this.checkAttackCollisions();
             this.updateSpecialEffects();
             this.checkCoinCollisions();
+            this.cleanupDefeatedEnemies();
             this.checkGameResult();
         }, 1000 / 60);
+    }
+
+    /**
+     * Removes regular enemies whose death animation has finished.
+     */
+    cleanupDefeatedEnemies() {
+        this.enemies = this.enemies.filter((enemy) => this.keepEnemyAfterCleanup(enemy));
+        this.endboss = this.enemies.find((enemy) => enemy instanceof Endboss) ?? this.endboss;
+    }
+
+    /**
+     * Determines whether an enemy stays after cleanup checks.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @returns {boolean} True if the enemy should remain in the world.
+     */
+    keepEnemyAfterCleanup(enemy) {
+        if (enemy instanceof Endboss) return true;
+        if (typeof enemy.shouldBeRemoved !== "function") return true;
+        return !enemy.shouldBeRemoved();
     }
 
     /**
@@ -319,9 +348,37 @@ class World {
      */
     enemyHitsCharacter(enemy) {
         const isActiveEndboss = enemy instanceof Endboss && enemy.isActivated;
-        const isRegularEnemyTouch = !isActiveEndboss && this.isColliding(this.character, enemy);
-        const isBossAttackHit = this.isBossAttackHit(enemy, isActiveEndboss);
-        return isRegularEnemyTouch || isBossAttackHit;
+        const allowsContactDamage = this.enemyAllowsContactDamage(enemy, isActiveEndboss);
+        const isRegularEnemyTouch = allowsContactDamage && this.isColliding(this.character, enemy);
+        const isAttackHit = this.isEnemyAttackHit(enemy, isActiveEndboss);
+        return isRegularEnemyTouch || isAttackHit;
+    }
+
+    /**
+     * Checks whether enemy may deal passive touch damage.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @param {boolean} isActiveEndboss Whether this enemy is the active endboss.
+     * @returns {boolean} True when contact damage is allowed.
+     */
+    enemyAllowsContactDamage(enemy, isActiveEndboss) {
+        if (isActiveEndboss) return false;
+        const hasAttackHitbox = typeof enemy.getAttackBox === "function";
+        const hasAttackState = typeof enemy.isAttacking === "boolean";
+        return !(hasAttackHitbox && hasAttackState);
+    }
+
+    /**
+     * Checks whether an enemy attack box currently hits the character.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @param {boolean} isActiveEndboss Whether this enemy is the active endboss.
+     * @returns {boolean} True when attack hit conditions are fulfilled.
+     */
+    isEnemyAttackHit(enemy, isActiveEndboss) {
+        if (isActiveEndboss) return this.isBossAttackHit(enemy, true);
+        if (!enemy.isAttacking || typeof enemy.getAttackBox !== "function") return false;
+        if (!this.isColliding(this.character, enemy.getAttackBox())) return false;
+        if (typeof enemy.tryConsumeAttackDamage !== "function") return true;
+        return enemy.tryConsumeAttackDamage();
     }
 
     /**

@@ -1,0 +1,106 @@
+.game-stage
+{
+	position: relative;
+	width: 720px;
+	max-width: 100%;
+}
+
+.game-viewport
+{
+	position: relative;
+	width: 100%;
+}
+
+.start-screen
+{
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	overflow: hidden;
+	border-radius: 12px;
+	transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.start-screen.hidden
+{
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.start-screen__bg
+{
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.start-screen__buttons
+{
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+	width: 100%;
+	padding: 0 24px 28px;
+	box-sizing: border-box;
+	flex-wrap: wrap;
+}
+
+.end-screen
+{
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 30;
+}
+
+.end-screen.hidden
+{
+	display: none;
+}
+
+.end-screen__backdrop
+{
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.72);
+}
+
+.end-screen__content
+{
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0;
+	width: min(90vw, 760px);
+}
+
+.end-screen__image
+{
+	max-width: 100%;
+	max-height: 86vh;
+	object-fit: contain;
+}
+
+.end-screen__buttons
+{
+	position: relative;
+	margin-top: -120px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+	flex-wrap: wrap;
+	z-index: 2;
+}

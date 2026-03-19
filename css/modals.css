@@ -1,0 +1,144 @@
+.rotate-overlay
+{
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	box-sizing: border-box;
+	background: rgba(6, 7, 16, 0.94);
+	z-index: 50;
+}
+
+.rotate-overlay--active
+{
+	display: flex;
+}
+
+.rotate-overlay__panel
+{
+	width: min(92vw, 420px);
+	padding: 28px 24px;
+	border-radius: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: linear-gradient(180deg, rgba(28, 27, 44, 0.96), rgba(10, 9, 20, 0.96));
+	text-align: center;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.rotate-overlay__title
+{
+	margin: 0 0 10px;
+	color: #ffd36e;
+	font-size: 28px;
+	font-weight: 700;
+}
+
+.rotate-overlay__subtitle
+{
+	margin: 0;
+	color: rgba(255, 255, 255, 0.84);
+	line-height: 1.5;
+}
+
+.modal
+{
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 20;
+}
+
+.modal.hidden
+{
+	display: none;
+}
+
+.modal__backdrop
+{
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.72);
+}
+
+.modal:not(.hidden) .modal__backdrop
+{
+	animation: modalBackdropIn 220ms ease;
+}
+
+.modal__panel
+{
+	position: relative;
+	z-index: 1;
+	max-width: min(90vw, 720px);
+	max-height: 90vh;
+	padding: 20px;
+	border-radius: 18px;
+	background: rgba(8, 8, 12, 0.92);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.modal__panel--shop
+{
+	width: min(92vw, 960px);
+	max-width: min(92vw, 960px);
+	max-height: none;
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
+	overflow: visible;
+}
+
+.modal__panel--text
+{
+	width: min(92vw, 520px);
+	color: white;
+}
+
+.modal__panel--text h2
+{
+	margin-top: 0;
+}
+
+.imprint-link
+{
+	color: white;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.modal:not(.hidden) .modal__panel
+{
+	animation: modalPanelIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal__panel img
+{
+	display: block;
+	max-width: 100%;
+	max-height: calc(90vh - 40px);
+	object-fit: contain;
+}
+
+.modal__close
+{
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	border: 0;
+	border-radius: 999px;
+	width: 32px;
+	height: 32px;
+	cursor: pointer;
+	background: rgba(255, 255, 255, 0.9);
+}
+
+.modal__panel--shop .modal__close
+{
+	top: 34px;
+	right: 34px;
+	z-index: 3;
+}

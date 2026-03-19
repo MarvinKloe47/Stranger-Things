@@ -167,15 +167,23 @@ class World {
      */
     checkAttackCollisions() {
         if (!this.character.isInAttackHitWindow()) return;
+
         const attackBox = this.character.getAttackBox();
+        this.enemies = this.enemies.filter((enemy) => this.keepEnemyAfterAttackCheck(enemy, attackBox));
+    }
 
-        this.enemies = this.enemies.filter((enemy) => {
-            if (enemy instanceof Endboss) {
-                return this.checkBossHitDuringAttack(enemy, attackBox);
-            }
+    /**
+     * Routes player attack checks to boss or regular enemy handling.
+     * @param {MovableObjects} enemy The enemy to evaluate.
+     * @param {Object} attackBox The current player attack box.
+     * @returns {boolean} True if the enemy remains in the world.
+     */
+    keepEnemyAfterAttackCheck(enemy, attackBox) {
+        if (enemy instanceof Endboss) {
+            return this.checkBossHitDuringAttack(enemy, attackBox);
+        }
 
-            return this.checkEnemyHitDuringAttack(enemy, attackBox);
-        });
+        return this.checkEnemyHitDuringAttack(enemy, attackBox);
     }
 
     /**
@@ -187,6 +195,24 @@ class World {
     checkEnemyHitDuringAttack(enemy, attackBox) {
         if (!this.shouldApplyPlayerAttackHit(enemy, attackBox)) return true;
         this.character.markTargetHitInCurrentAttack(enemy);
+        return this.keepEnemyAfterPlayerAttack(enemy);
+    }
+
+    /**
+     * Applies player melee damage resolution to regular enemies.
+     * @param {MovableObjects} enemy The enemy to apply damage logic to.
+     * @returns {boolean} True if the enemy survives this hit.
+     */
+    keepEnemyAfterPlayerAttack(enemy) {
+        if (typeof enemy.takeHit === "function") {
+            return enemy.takeHit(1);
+        }
+
+        if (enemy instanceof Orc) {
+            enemy.hitsTaken = (enemy.hitsTaken ?? 0) + 1;
+            return enemy.hitsTaken < 2;
+        }
+
         return false;
     }
 
@@ -317,8 +343,6 @@ class World {
      * Clears the temporary hurt state after the hurt animation time.
      */
     updateCharacterStates() {
-        this.character.updateAttackState();
-
         if (!this.character.isDead && Date.now() - this.character.lastHit >= 500) {
             this.character.isHurt = false;
         }

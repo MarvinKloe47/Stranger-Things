@@ -85,15 +85,19 @@ class Endboss extends MovableObjects {
     currentAnimation = 'idle';
 
     lastAttackTime = 0;
+    attackStartedAt = 0;
+    nextAttackAllowedAt = 0;
     lastPlayerAttackTime = 0;
     hasAppliedAttackDamage = false;
     maxEnergy = 100;
     energy = 100;
 
-    attackCooldown = 2600;
-    attackDuration = 650;
-    attackRange = 220;
-    chaseStopDistance = 24;
+    attackCooldown = 3200;
+    attackDuration = 820;
+    attackRange = 170;
+    attackHitStart = 320;
+    attackHitEnd = 610;
+    chaseStopDistance = 34;
     recoveryDuration = 950;
     hurtDuration = 500;
     animationInterval = 140;
@@ -334,7 +338,7 @@ class Endboss extends MovableObjects {
      * @returns {boolean} True when attack is allowed.
      */
     canAttack() {
-        return !this.isRecovering && Date.now() - this.lastAttackTime >= this.attackCooldown;
+        return !this.isRecovering && Date.now() >= this.nextAttackAllowedAt;
     }
 
     /**
@@ -345,6 +349,8 @@ class Endboss extends MovableObjects {
 
         this.setState('attack');
         this.lastAttackTime = Date.now();
+        this.attackStartedAt = this.lastAttackTime;
+        this.nextAttackAllowedAt = Number.MAX_SAFE_INTEGER;
         this.hasAppliedAttackDamage = false;
 
         gameSetTimeout(() => {
@@ -355,6 +361,7 @@ class Endboss extends MovableObjects {
             }
 
             this.isRecovering = true;
+            this.nextAttackAllowedAt = Date.now() + this.attackCooldown;
 
             gameSetTimeout(() => {
                 if (this.isState('dead')) return;
@@ -372,9 +379,30 @@ class Endboss extends MovableObjects {
      * @returns {boolean}
      */
     tryConsumeAttackDamage() {
-        if (!this.isState('attack') || this.hasAppliedAttackDamage) return false;
+        if (!this.isInAttackHitWindow() || this.hasAppliedAttackDamage) return false;
         this.hasAppliedAttackDamage = true;
         return true;
+    }
+
+    /**
+     * Checks whether the attack animation is currently inside its active hit window.
+     * @returns {boolean} True when the hitbox should be damaging.
+     */
+    isInAttackHitWindow() {
+        if (!this.isState('attack')) return false;
+        const elapsed = Date.now() - this.attackStartedAt;
+        return elapsed >= this.attackHitStart && elapsed <= this.attackHitEnd;
+    }
+
+    /**
+     * Checks whether the target is in front of the boss and within attack range.
+     * @param {{x:number,width:number}} character Player character.
+     * @returns {boolean} True when the target is inside the active attack arc.
+     */
+    isTargetInAttackArc(character) {
+        const distance = this.getDistanceToCharacter(character);
+        if (Math.abs(distance) > this.attackRange) return false;
+        return this.otherDirection ? distance < 0 : distance > 0;
     }
 
     /**
@@ -382,12 +410,12 @@ class Endboss extends MovableObjects {
      * @returns {{x:number, y:number, width:number, height:number, offset:{top:number,right:number,bottom:number,left:number}}}
      */
     getAttackBox() {
-        const attackWidth = 145;
-        const attackHeight = this.height - 70;
-        const attackY = this.y + 24;
+        const attackWidth = 96;
+        const attackHeight = this.height - 118;
+        const attackY = this.y + 72;
         const attackX = this.otherDirection
-            ? this.x - attackWidth + 20
-            : this.x + this.width - 20;
+            ? this.x - attackWidth + 28
+            : this.x + this.width - 28;
 
         return {
             x: attackX,

@@ -389,9 +389,11 @@ class World {
      */
     isBossAttackHit(enemy, isActiveEndboss) {
         const isEndbossAttack = isActiveEndboss && enemy.isAttacking;
-        return isEndbossAttack
-            && this.isColliding(this.character, enemy.getAttackBox())
-            && enemy.tryConsumeAttackDamage();
+        if (!isEndbossAttack) return false;
+        if (typeof enemy.isInAttackHitWindow === "function" && !enemy.isInAttackHitWindow()) return false;
+        if (typeof enemy.isTargetInAttackArc === "function" && !enemy.isTargetInAttackArc(this.character)) return false;
+        if (!this.isColliding(this.character, enemy.getAttackBox())) return false;
+        return enemy.tryConsumeAttackDamage();
     }
 
     /**

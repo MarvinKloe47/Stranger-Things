@@ -87,6 +87,7 @@ class Endboss extends MovableObjects {
     lastAttackTime = 0;
     lastPlayerAttackTime = 0;
     hasAppliedAttackDamage = false;
+    maxEnergy = 100;
     energy = 100;
 
     attackCooldown = 2600;

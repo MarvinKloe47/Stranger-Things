@@ -36,6 +36,7 @@ class Orc extends MovableObjects {
         "assets/img/3_enemies_demogorgon/2_enemies_orc/0_Orc_Walking_023.png",
     ];
     remainingHealth = 1;
+    maxRemainingHealth = 1;
 
     /**
      * @param {number} [x=500 + Math.random() * 900] Initial x position.

@@ -21,6 +21,7 @@ class Demogorgon extends MovableObjects
         "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
         ];
     remainingHealth = 2;
+    maxRemainingHealth = 2;
 
     /**
      * @param {number} [x=700] Initial x position.

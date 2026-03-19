@@ -13,6 +13,19 @@ class World {
     constructor(canvas, keyboard, options = {}) {
         this.ctx = canvas.getContext("2d");
         this.keyboard = keyboard;
+        this.initializeWorldState(options);
+        this.initializeSceneObjects();
+
+        this.configureScene();
+        this.run();
+        this.draw();
+    }
+
+    /**
+     * Initializes world-level state and external integrations.
+     * @param {{audioManager?: AudioManager|null, onShopUiChange?: Function|null, onGameEnd?: Function|null}} options Options object.
+     */
+    initializeWorldState(options) {
         this.audioManager = options.audioManager ?? null;
         this.onShopUiChange = options.onShopUiChange ?? null;
         this.onGameEnd = options.onGameEnd ?? null;
@@ -24,9 +37,23 @@ class World {
         this.gameFinished = false;
         this.isDisposed = false;
         this.activeSpecialEffects = [];
-        this.specialEffectImage = new Image();
-        this.specialEffectImage.src = "assets/img/9_shop/freigeschaltet/3.png";
+        this.specialEffectImage = this.createSpecialEffectImage();
+    }
 
+    /**
+     * Creates the image used for special effect rendering.
+     * @returns {HTMLImageElement} Prepared image element.
+     */
+    createSpecialEffectImage() {
+        const image = new Image();
+        image.src = "assets/img/9_shop/freigeschaltet/3.png";
+        return image;
+    }
+
+    /**
+     * Initializes runtime scene objects and level entities.
+     */
+    initializeSceneObjects() {
         this.character = new Character();
         this.statusBar = new StatusBar();
         this.bossStatusBar = new BossStatusBar();
@@ -38,10 +65,6 @@ class World {
         this.backgroundObjects = this.level.backgroundObjects;
         this.endboss = this.enemies.find((enemy) => enemy instanceof Endboss);
         this.camera_x = 0;
-
-        this.configureScene();
-        this.run();
-        this.draw();
     }
 
     /**
@@ -118,22 +141,157 @@ class World {
     draw() {
         if (this.isDisposed) return;
         this.ctx.clearRect(0, 0, this.worldWidth, this.worldHeight);
+        this.drawWorldLayer();
+        this.drawHudLayer();
+        gameRequestAnimationFrame(() => this.draw());
+    }
+
+    /**
+     * Draws world-space objects affected by camera and shake transforms.
+     */
+    drawWorldLayer() {
         this.applyScreenShake();
         this.ctx.translate(this.camera_x, 0);
         this.addObjectstoMap(this.backgroundObjects);
         this.clouds.forEach((cloud) => this.addToMap(cloud));
         this.addObjectstoMap(this.coins);
         this.addObjectstoMap(this.enemies);
+        this.drawEnemyHealthBars();
         this.drawSpecialEffects();
         this.addToMap(this.character);
         this.ctx.translate(-this.camera_x, 0);
         this.resetScreenShake();
+    }
+
+    /**
+     * Draws HUD-space elements.
+     */
+    drawHudLayer() {
         this.addToMap(this.statusBar);
         this.addToMap(this.coinCounter);
-        drawBossStatus(this);
         drawAttackCooldown(this);
         drawSpecialCooldown(this);
-        gameRequestAnimationFrame(() => this.draw());
+    }
+
+    /**
+     * Draws overhead health bars for active enemies.
+     */
+    drawEnemyHealthBars() {
+        this.enemies.forEach((enemy) => this.drawEnemyHealthBar(enemy));
+    }
+
+    /**
+     * Draws one overhead health bar for the given enemy when health data is available.
+     * @param {MovableObjects} enemy The enemy to draw a health bar for.
+     */
+    drawEnemyHealthBar(enemy) {
+        const healthData = this.resolveEnemyHealthData(enemy);
+        if (!healthData) return;
+
+        const percentage = this.getHealthPercentage(healthData.current, healthData.max);
+        if (percentage <= 0) return;
+
+        const barRect = this.getEnemyHealthBarRect(enemy);
+        this.drawEnemyHealthBarFrame(barRect, percentage);
+        if (enemy instanceof Endboss) this.drawEndbossNameLabel(enemy, barRect.y);
+    }
+
+    /**
+     * Returns render geometry for an enemy health bar.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @returns {{x:number,y:number,width:number,height:number}} Bar geometry.
+     */
+    getEnemyHealthBarRect(enemy) {
+        const width = Math.max(34, Math.min(96, enemy.width * 0.55));
+        return {
+            x: enemy.x + (enemy.width - width) / 2,
+            y: enemy.y - 10,
+            width,
+            height: 6,
+        };
+    }
+
+    /**
+     * Draws one enemy health bar background and fill.
+     * @param {{x:number,y:number,width:number,height:number}} barRect Bar geometry.
+     * @param {number} percentage Normalized health percentage.
+     */
+    drawEnemyHealthBarFrame(barRect, percentage) {
+        this.ctx.save();
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        this.ctx.fillRect(barRect.x - 1, barRect.y - 1, barRect.width + 2, barRect.height + 2);
+
+        this.ctx.fillStyle = "#7a1111";
+        this.ctx.fillRect(barRect.x, barRect.y, barRect.width, barRect.height);
+
+        this.ctx.fillStyle = "#41d65c";
+        this.ctx.fillRect(barRect.x, barRect.y, barRect.width * percentage, barRect.height);
+        this.ctx.restore();
+    }
+
+    /**
+     * Draws endboss name label above the overhead health bar.
+     * @param {Endboss} enemy Endboss instance.
+     * @param {number} barY Health bar y position.
+     */
+    drawEndbossNameLabel(enemy, barY) {
+        const labelX = enemy.x + enemy.width / 2;
+        const labelY = barY - 3;
+        this.ctx.save();
+        this.ctx.fillStyle = "#fff7dd";
+        this.ctx.strokeStyle = "rgba(20, 10, 0, 0.8)";
+        this.ctx.lineWidth = 3;
+        this.ctx.font = "bold 13px Arial";
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "bottom";
+        this.ctx.strokeText("Toto der Troll", labelX, labelY);
+        this.ctx.fillText("Toto der Troll", labelX, labelY);
+        this.ctx.restore();
+    }
+
+    /**
+     * Resolves health values for supported enemy types.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @returns {{current:number, max:number}|null} Current and max health values or null.
+     */
+    resolveEnemyHealthData(enemy) {
+        const bossData = this.resolveBossHealthData(enemy);
+        if (bossData) return bossData;
+        return this.resolveRegularEnemyHealthData(enemy);
+    }
+
+    /**
+     * Resolves health data for the endboss.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @returns {{current:number,max:number}|null} Boss health data or null.
+     */
+    resolveBossHealthData(enemy) {
+        if (!(enemy instanceof Endboss)) return null;
+        if (!enemy.isActivated && !enemy.isAwakening) return null;
+        return { current: enemy.energy, max: enemy.maxEnergy ?? 100 };
+    }
+
+    /**
+     * Resolves health data for regular enemies.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @returns {{current:number,max:number}|null} Regular enemy health data or null.
+     */
+    resolveRegularEnemyHealthData(enemy) {
+        const hasHealth = typeof enemy.remainingHealth === "number";
+        const hasMaxHealth = typeof enemy.maxRemainingHealth === "number";
+        if (!hasHealth || !hasMaxHealth) return null;
+        return { current: enemy.remainingHealth, max: enemy.maxRemainingHealth };
+    }
+
+    /**
+     * Calculates a clamped normalized health value.
+     * @param {number} current Current health.
+     * @param {number} max Maximum health.
+     * @returns {number} Health percentage from 0 to 1.
+     */
+    getHealthPercentage(current, max) {
+        if (!Number.isFinite(current) || !Number.isFinite(max) || max <= 0) return 0;
+        return Math.max(0, Math.min(1, current / max));
     }
 
     /**
@@ -149,28 +307,56 @@ class World {
      */
     checkCollisions() {
         this.enemies.forEach((enemy) => {
-            const isActiveEndboss = enemy instanceof Endboss && enemy.isActivated;
-            const isEndbossAttack = isActiveEndboss && enemy.isAttacking;
-            const isRegularEnemyTouch = !isActiveEndboss && this.isColliding(this.character, enemy);
-            const isBossAttackHit = isEndbossAttack
-                && this.isColliding(this.character, enemy.getAttackBox())
-                && enemy.tryConsumeAttackDamage();
-            const hitsCharacter = isRegularEnemyTouch
-                || isBossAttackHit;
-
-            if (!hitsCharacter || !this.canTakeDamage()) return;
-            this.character.lastHit = Date.now();
-            this.character.isHurt = true;
-            this.audioManager?.playHurtSound();
-            this.character.energy -= 20;
-            this.statusBar.setPercentage(this.character.energy);
-
-            if (this.character.energy <= 0) {
-                this.character.isDead = true;
-                this.character.energy = 0;
-                this.statusBar.setPercentage(this.character.energy);
-            }
+            if (!this.enemyHitsCharacter(enemy) || !this.canTakeDamage()) return;
+            this.applyCharacterDamage(20);
         });
+    }
+
+    /**
+     * Checks whether one enemy currently hits the character.
+     * @param {MovableObjects} enemy Enemy to evaluate.
+     * @returns {boolean} True if the enemy hits the character now.
+     */
+    enemyHitsCharacter(enemy) {
+        const isActiveEndboss = enemy instanceof Endboss && enemy.isActivated;
+        const isRegularEnemyTouch = !isActiveEndboss && this.isColliding(this.character, enemy);
+        const isBossAttackHit = this.isBossAttackHit(enemy, isActiveEndboss);
+        return isRegularEnemyTouch || isBossAttackHit;
+    }
+
+    /**
+     * Checks whether an active endboss attack hits the character.
+     * @param {MovableObjects} enemy Enemy instance.
+     * @param {boolean} isActiveEndboss Whether this enemy is the active endboss.
+     * @returns {boolean} True if a boss attack hit is confirmed.
+     */
+    isBossAttackHit(enemy, isActiveEndboss) {
+        const isEndbossAttack = isActiveEndboss && enemy.isAttacking;
+        return isEndbossAttack
+            && this.isColliding(this.character, enemy.getAttackBox())
+            && enemy.tryConsumeAttackDamage();
+    }
+
+    /**
+     * Applies damage to the character and updates related state.
+     * @param {number} damage Incoming damage amount.
+     */
+    applyCharacterDamage(damage) {
+        this.character.lastHit = Date.now();
+        this.character.isHurt = true;
+        this.audioManager?.playHurtSound();
+        this.character.energy -= damage;
+        if (this.character.energy <= 0) return this.setCharacterDead();
+        this.statusBar.setPercentage(this.character.energy);
+    }
+
+    /**
+     * Sets character death state and clamps health to zero.
+     */
+    setCharacterDead() {
+        this.character.isDead = true;
+        this.character.energy = 0;
+        this.statusBar.setPercentage(this.character.energy);
     }
 
     /**
@@ -277,23 +463,22 @@ class World {
     triggerSpecialAttack() {
         if (this.gameFinished || !this.character.activateSpecial()) return false;
         this.audioManager?.playLaserSound();
-
-        this.activeSpecialEffects.push({
-            x: this.character.otherDirection ? this.character.x + 18 : this.character.x + this.character.width - 18,
-            y: this.character.y + 76,
-            width: 360,
-            height: 72,
-            direction: this.character.otherDirection ? -1 : 1,
-            damage: 55,
-            hitIds: new Set(),
-            createdAt: Date.now(),
-            durationMs: 520,
-            baseWidth: 360,
-            baseHeight: 72,
-            offset: { top: 8, right: 14, bottom: 8, left: 14 },
-        });
-
+        this.activeSpecialEffects.push(this.createSpecialEffect());
         return true;
+    }
+
+    /**
+     * Builds a new special beam effect payload.
+     * @returns {{x:number,y:number,width:number,height:number,direction:number,damage:number,hitIds:Set,createdAt:number,durationMs:number,baseWidth:number,baseHeight:number,offset:{top:number,right:number,bottom:number,left:number}}} Effect payload.
+     */
+    createSpecialEffect() {
+        const direction = this.character.otherDirection ? -1 : 1;
+        const x = direction < 0 ? this.character.x + 18 : this.character.x + this.character.width - 18;
+        return {
+            x, direction, damage: 55, hitIds: new Set(), createdAt: Date.now(), durationMs: 520,
+            y: this.character.y + 76, width: 360, height: 72, baseWidth: 360, baseHeight: 72,
+            offset: { top: 8, right: 14, bottom: 8, left: 14 },
+        };
     }
 
     /**
@@ -303,20 +488,36 @@ class World {
         if (this.activeSpecialEffects.length === 0) return;
 
         const now = Date.now();
-        this.activeSpecialEffects = this.activeSpecialEffects.filter((effect) => {
-            const progress = Math.min(1, (now - effect.createdAt) / effect.durationMs);
-            const activeWidth = effect.baseWidth * (progress < 0.18 ? progress / 0.18 : 1);
-            const collisionBox = {
-                x: effect.direction < 0 ? effect.x - activeWidth : effect.x,
-                y: effect.y,
-                width: activeWidth,
-                height: effect.baseHeight,
-                offset: effect.offset,
-            };
+        this.activeSpecialEffects = this.activeSpecialEffects
+            .filter((effect) => this.updateSpecialEffect(effect, now));
+    }
 
-            this.enemies = this.enemies.filter((enemy) => this.keepEnemyAfterSpecialHit(enemy, effect, collisionBox, now));
-            return now - effect.createdAt <= effect.durationMs;
-        });
+    /**
+     * Updates one special effect instance and resolves its collisions.
+     * @param {Object} effect Active special effect.
+     * @param {number} now Current timestamp.
+     * @returns {boolean} True while the effect remains active.
+     */
+    updateSpecialEffect(effect, now) {
+        const progress = Math.min(1, (now - effect.createdAt) / effect.durationMs);
+        const collisionBox = this.buildSpecialCollisionBox(effect, progress);
+        this.enemies = this.enemies
+            .filter((enemy) => this.keepEnemyAfterSpecialHit(enemy, effect, collisionBox, now));
+        return now - effect.createdAt <= effect.durationMs;
+    }
+
+    /**
+     * Builds the active collision area of a special beam by progress.
+     * @param {Object} effect Active special effect.
+     * @param {number} progress Normalized effect progress.
+     * @returns {{x:number,y:number,width:number,height:number,offset:Object}} Active collision box.
+     */
+    buildSpecialCollisionBox(effect, progress) {
+        const activeWidth = effect.baseWidth * (progress < 0.18 ? progress / 0.18 : 1);
+        return {
+            x: effect.direction < 0 ? effect.x - activeWidth : effect.x,
+            y: effect.y, width: activeWidth, height: effect.baseHeight, offset: effect.offset,
+        };
     }
 
     /**
@@ -344,28 +545,49 @@ class World {
      * Draws all active special attack effects.
      */
     drawSpecialEffects() {
-        this.activeSpecialEffects.forEach((effect) => {
-            if (!this.specialEffectImage.complete || this.specialEffectImage.naturalWidth === 0) return;
-            const elapsed = Date.now() - effect.createdAt;
-            const progress = Math.min(1, elapsed / effect.durationMs);
-            const beamGrowth = progress < 0.2 ? 0.18 + (progress / 0.2) * 0.82 : 1 + ((progress - 0.2) / 0.8) * 0.35;
-            const alpha = progress < 0.75 ? 0.98 : 0.98 - ((progress - 0.75) / 0.25) * 0.45;
-            const drawWidth = effect.baseWidth * beamGrowth;
-            const drawHeight = effect.baseHeight * (0.82 + Math.sin(progress * Math.PI * 5) * 0.04);
-            const drawY = effect.y + (effect.baseHeight - drawHeight) / 2;
-            this.ctx.save();
-            this.ctx.globalAlpha = alpha;
+        this.activeSpecialEffects.forEach((effect) => this.drawSpecialEffect(effect));
+    }
 
-            if (effect.direction < 0) {
-                this.ctx.translate(effect.x, drawY);
-                this.ctx.scale(-1, 1);
-                this.ctx.drawImage(this.specialEffectImage, 0, 0, drawWidth, drawHeight);
-            } else {
-                this.ctx.drawImage(this.specialEffectImage, effect.x, drawY, drawWidth, drawHeight);
-            }
+    /**
+     * Draws one special beam effect.
+     * @param {Object} effect Active special effect.
+     */
+    drawSpecialEffect(effect) {
+        if (!this.specialEffectImage.complete || this.specialEffectImage.naturalWidth === 0) return;
+        const metrics = this.getSpecialDrawMetrics(effect);
+        this.ctx.save();
+        this.ctx.globalAlpha = metrics.alpha;
+        if (effect.direction < 0) return this.drawMirroredSpecialEffect(effect, metrics);
+        this.ctx.drawImage(this.specialEffectImage, effect.x, metrics.drawY, metrics.drawWidth, metrics.drawHeight);
+        this.ctx.restore();
+    }
 
-            this.ctx.restore();
-        });
+    /**
+     * Draws one mirrored special beam effect.
+     * @param {Object} effect Active special effect.
+     * @param {{drawY:number,drawWidth:number,drawHeight:number}} metrics Render metrics.
+     */
+    drawMirroredSpecialEffect(effect, metrics) {
+        this.ctx.translate(effect.x, metrics.drawY);
+        this.ctx.scale(-1, 1);
+        this.ctx.drawImage(this.specialEffectImage, 0, 0, metrics.drawWidth, metrics.drawHeight);
+        this.ctx.restore();
+    }
+
+    /**
+     * Computes draw metrics for one special beam frame.
+     * @param {Object} effect Active special effect.
+     * @returns {{alpha:number,drawY:number,drawWidth:number,drawHeight:number}} Beam draw metrics.
+     */
+    getSpecialDrawMetrics(effect) {
+        const elapsed = Date.now() - effect.createdAt;
+        const progress = Math.min(1, elapsed / effect.durationMs);
+        const growth = progress < 0.2 ? 0.18 + (progress / 0.2) * 0.82 : 1 + ((progress - 0.2) / 0.8) * 0.35;
+        const alpha = progress < 0.75 ? 0.98 : 0.98 - ((progress - 0.75) / 0.25) * 0.45;
+        const drawWidth = effect.baseWidth * growth;
+        const drawHeight = effect.baseHeight * (0.82 + Math.sin(progress * Math.PI * 5) * 0.04);
+        const drawY = effect.y + (effect.baseHeight - drawHeight) / 2;
+        return { alpha, drawY, drawWidth, drawHeight };
     }
 
     /**

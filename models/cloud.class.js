@@ -7,7 +7,7 @@ class Cloud extends MovableObjects
      constructor(x = 0, y = 20)
     {
         super();
-        this.loadImage("img/4_clouds/1.png");
+        this.loadImage("assets/img/4_clouds/1.png");
         this.x = x;
         this.y = y;
         this.speed = 0.2;

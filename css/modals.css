@@ -83,6 +83,7 @@
 
 .modal__panel--shop
 {
+    position: relative;
 	width: min(92vw, 960px);
 	max-width: min(92vw, 960px);
 	max-height: none;
@@ -115,7 +116,7 @@
 	animation: modalPanelIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.modal__panel img
+.modal__panel > img
 {
 	display: block;
 	max-width: 100%;

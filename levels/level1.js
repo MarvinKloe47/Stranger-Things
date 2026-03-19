@@ -64,13 +64,13 @@ function createRandomEnemies() {
  */
 function createBackgroundObjects(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIEWPORT_HEIGHT) {
     const brightLayers = [
-        { path: "img/5_background/bright/Sky.png", y: 0 },
-        { path: "img/5_background/bright/City2.png", y: 0 },
-        { path: "img/5_background/bright/back.png", y: 0 },
-        { path: "img/5_background/bright/houses1.png", y: 0 },
-        { path: "img/5_background/bright/houses3.png", y: 0 },
-        { path: "img/5_background/bright/minishop&callbox.png", y: 0 },
-        { path: "img/5_background/bright/road&lamps.png", y: 0 },
+        { path: "assets/img/5_background/bright/Sky.png", y: 0 },
+        { path: "assets/img/5_background/bright/City2.png", y: 0 },
+        { path: "assets/img/5_background/bright/back.png", y: 0 },
+        { path: "assets/img/5_background/bright/houses1.png", y: 0 },
+        { path: "assets/img/5_background/bright/houses3.png", y: 0 },
+        { path: "assets/img/5_background/bright/minishop&callbox.png", y: 0 },
+        { path: "assets/img/5_background/bright/road&lamps.png", y: 0 },
     ];
     const backgroundRepeats = Math.ceil(LEVEL_END_X / worldWidth) + 1;
     const backgroundObjects = [];

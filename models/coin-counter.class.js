@@ -1,5 +1,5 @@
 class CoinCounter extends DrawableObject {
-    ICON = "img/8_collectables/coin counter.png";
+    ICON = "assets/img/8_collectables/coin counter.png";
 
     value = 0;
     textOffsetX = 0;

@@ -1,11 +1,11 @@
 class StatusBar extends DrawableObject {
     IMAGES = [
-        "img/6_statusbar/Purple/0.png",
-        "img/6_statusbar/Purple/20.png",
-        "img/6_statusbar/Purple/40.png",
-        "img/6_statusbar/Purple/60.png",
-        "img/6_statusbar/Purple/80.png",
-        "img/6_statusbar/Purple/100.png",
+        "assets/img/6_statusbar/Purple/0.png",
+        "assets/img/6_statusbar/Purple/20.png",
+        "assets/img/6_statusbar/Purple/40.png",
+        "assets/img/6_statusbar/Purple/60.png",
+        "assets/img/6_statusbar/Purple/80.png",
+        "assets/img/6_statusbar/Purple/100.png",
     ];
 
     percentage = 100;

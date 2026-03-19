@@ -35,7 +35,7 @@ const specialPrice = 300;
  */
 function init() {
     cacheDomElements();
-    audioManager = new AudioManager("audio/game-loop.mp3");
+    audioManager = new AudioManager("assets/audio/game-loop.mp3");
     DrawableObject.debugMode = debugMode;
     registerUiEvents();
     bindMobileControls();

@@ -1,7 +1,7 @@
 @font-face
 {
 	font-family: "ArcadeFallback";
-	src: url("../fonts/trebuc.ttf") format("truetype");
+	src: url("../assets/fonts/trebuc.ttf") format("truetype");
 	font-display: swap;
 }
 
@@ -16,7 +16,7 @@ body
 	margin: 0;
 	padding: 24px;
 	box-sizing: border-box;
-	background-image: url("../img/7_ProjectIMG/bg.png");
+	background-image: url("../assets/img/7_ProjectIMG/bg.png");
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;

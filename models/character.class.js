@@ -27,11 +27,11 @@ class Character extends MovableObjects {
      lastSpecialTime = -4500;
 
     // SpriteSheets
-    SPRITE_WALK = "img/2_character_will/2_walk/Walk.png";
-    IMAGES_JUMP = ["img/2_character_will/3_jump/Jump.png"];
-    SPRITE_HURT = "img/2_character_will/4_hurt/Hurt.png";
-    SPRITE_DEAD = "img/2_character_will/5_dead/Dead.png";
-    SPRITE_ATTACK = "img/2_character_will/6_attack/Attack_1.png";
+    SPRITE_WALK = "assets/img/2_character_will/2_walk/Walk.png";
+    IMAGES_JUMP = ["assets/img/2_character_will/3_jump/Jump.png"];
+    SPRITE_HURT = "assets/img/2_character_will/4_hurt/Hurt.png";
+    SPRITE_DEAD = "assets/img/2_character_will/5_dead/Dead.png";
+    SPRITE_ATTACK = "assets/img/2_character_will/6_attack/Attack_1.png";
     walkFrameCount = 8;
     jumpFrameCount = 12;
     hurtFrameCount = 2;

@@ -3,12 +3,12 @@ class AudioManager {
 
     constructor(loopPath) {
         this.backgroundLoop = new Audio(loopPath);
-        this.jumpSound = new Audio("audio/jump.mp3");
-        this.hurtSound = new Audio("audio/hurt.mp3");
-        this.collectSound = new Audio("audio/Collect_sound.wav");
-        this.attackSound = new Audio("audio/Karateka_attack.wav");
-        this.laserSound = new Audio("audio/laser_sound.wav");
-        this.evilLaughSound = new Audio("audio/evil-laugh.mp3");
+        this.jumpSound = new Audio("assets/audio/jump.mp3");
+        this.hurtSound = new Audio("assets/audio/hurt.mp3");
+        this.collectSound = new Audio("assets/audio/Collect_sound.wav");
+        this.attackSound = new Audio("assets/audio/Karateka_attack.wav");
+        this.laserSound = new Audio("assets/audio/laser_sound.wav");
+        this.evilLaughSound = new Audio("assets/audio/evil-laugh.mp3");
         this.backgroundLoop.loop = true;
         this.backgroundLoop.volume = 0.35;
         this.jumpSound.volume = 0.45;

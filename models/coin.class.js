@@ -1,7 +1,7 @@
 class Coin extends DrawableObject {
     IMAGES = [
-        "img/8_collectables/coin_1.png",
-        "img/8_collectables/coin_2.png",
+        "assets/img/8_collectables/coin_1.png",
+        "assets/img/8_collectables/coin_2.png",
     ];
 
     offset = {

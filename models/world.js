@@ -17,7 +17,7 @@ class World {
         this.isDisposed = false;
         this.activeSpecialEffects = [];
         this.specialEffectImage = new Image();
-        this.specialEffectImage.src = "img/9_shop/freigeschaltet/3.png";
+        this.specialEffectImage.src = "assets/img/9_shop/freigeschaltet/3.png";
 
         this.character = new Character();
         this.statusBar = new StatusBar();

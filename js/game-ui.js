@@ -6,8 +6,8 @@ function updateMusicButton() {
 
     if (musicButtonIcon) {
         musicButtonIcon.src = isMuted
-            ? "img/7_ProjectIMG/music_off.png"
-            : "img/7_ProjectIMG/misic.png";
+            ? "assets/img/7_ProjectIMG/music_off.png"
+            : "assets/img/7_ProjectIMG/misic.png";
     }
 
     if (musicButton) {
@@ -177,8 +177,8 @@ function showEndScreen(type) {
     if (!endScreen || !endScreenImage) return;
 
     endScreenImage.src = type === "win"
-        ? "img/7_ProjectIMG/win_2.png"
-        : "img/7_ProjectIMG/oh no you lost!.png";
+        ? "assets/img/7_ProjectIMG/win_2.png"
+        : "assets/img/7_ProjectIMG/oh no you lost!.png";
     endScreenImage.alt = type === "win" ? "You win" : "You lost";
     endScreen.classList.remove("hidden");
     endScreen.setAttribute("aria-hidden", "false");

@@ -7,20 +7,20 @@ class Demogorgon extends MovableObjects
         left: 58,
     };
     IMAGES_WALKING = [
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_002.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_003.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_004.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_005.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_006.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_007.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_008.png",
-        "img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_002.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_003.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_004.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_005.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_006.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_007.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_008.png",
+        "assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_009.png",
         ];
 
     constructor(x = 700) {
         super();
-        this.loadImage("img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
+        this.loadImage("assets/img/3_enemies_demogorgon/1_walk/Troll_01_1_WALK_001.png");
         this.loadImages(this.IMAGES_WALKING);
         this.setSize(170, 200);
         this.x = x;

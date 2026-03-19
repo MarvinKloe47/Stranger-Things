@@ -85,23 +85,39 @@ function setShopMessage(message, type = "") {
 function updateShopUi() {
     const coins = world?.character?.coins ?? getStoredCoins();
     const unlocked = world?.character?.specialUnlocked ?? isSpecialUnlocked();
+    updateShopCoinText(coins);
+    updateSpecialButtonState(unlocked);
+    updateShopStatusMessage(coins, unlocked);
+}
 
-    if (shopCoinsValue) {
-        shopCoinsValue.textContent = String(coins);
-    }
+/**
+ * Updates the coin text in the shop UI.
+ * @param {number} coins Current coin amount.
+ */
+function updateShopCoinText(coins) {
+    if (!shopCoinsValue) return;
+    shopCoinsValue.textContent = String(coins);
+}
 
-    if (buySpecialButton) {
-        buySpecialButton.disabled = unlocked;
-        buySpecialButton.textContent = unlocked ? "Unlocked" : "Buy Upgrade";
-    }
+/**
+ * Updates the buy button based on unlock state.
+ * @param {boolean} unlocked Whether special attack is unlocked.
+ */
+function updateSpecialButtonState(unlocked) {
+    if (!buySpecialButton) return;
+    buySpecialButton.disabled = unlocked;
+    buySpecialButton.textContent = unlocked ? "Unlocked" : "Buy Upgrade";
+}
 
-    if (unlocked) {
-        setShopMessage("Special attack unlocked. Use S in-game.", "success");
-    } else if (coins < specialPrice) {
-        setShopMessage(`You need ${specialPrice - coins} more coins.`, "error");
-    } else {
-        setShopMessage("Enough coins available. Unlock it now.", "");
-    }
+/**
+ * Updates the informational shop message.
+ * @param {number} coins Current coin amount.
+ * @param {boolean} unlocked Whether special attack is unlocked.
+ */
+function updateShopStatusMessage(coins, unlocked) {
+    if (unlocked) return setShopMessage("Special attack unlocked. Use S in-game.", "success");
+    if (coins < specialPrice) return setShopMessage(`You need ${specialPrice - coins} more coins.`, "error");
+    setShopMessage("Enough coins available. Unlock it now.", "");
 }
 
 /**
@@ -116,28 +132,33 @@ function openShop() {
  * Unlocks the special attack when enough coins are available.
  */
 function buySpecialAttack() {
-    if (isSpecialUnlocked()) {
-        updateShopUi();
-        return;
-    }
-
+    if (isSpecialUnlocked()) return updateShopUi();
     const currentCoins = world?.character?.coins ?? getStoredCoins();
-    if (currentCoins < specialPrice) {
-        updateShopUi();
-        return;
-    }
-
+    if (currentCoins < specialPrice) return updateShopUi();
     const newCoinValue = currentCoins - specialPrice;
-    setStoredCoins(newCoinValue);
-    setSpecialUnlocked(true);
-
-    if (world) {
-        world.character.coins = newCoinValue;
-        world.character.specialUnlocked = true;
-        world.coinCounter.setValue(newCoinValue);
-    }
-
+    persistSpecialPurchase(newCoinValue);
+    applySpecialPurchaseToWorld(newCoinValue);
     updateShopUi();
+}
+
+/**
+ * Persists changes after a successful special purchase.
+ * @param {number} coinValue Remaining coins.
+ */
+function persistSpecialPurchase(coinValue) {
+    setStoredCoins(coinValue);
+    setSpecialUnlocked(true);
+}
+
+/**
+ * Applies special purchase state to active world instance.
+ * @param {number} coinValue Remaining coins.
+ */
+function applySpecialPurchaseToWorld(coinValue) {
+    if (!world) return;
+    world.character.coins = coinValue;
+    world.character.specialUnlocked = true;
+    world.coinCounter.setValue(coinValue);
 }
 
 /**
@@ -211,20 +232,35 @@ function resetGameSession(options) {
     releaseMobileControls();
     world = null;
     keyboard = new Keyboard();
-
-    if (endScreen) {
-        endScreen.classList.add("hidden");
-        endScreen.setAttribute("aria-hidden", "true");
-    }
-
-    if (startScreen) {
-        startScreen.classList.toggle("hidden", !options.returnToMenu);
-    }
-
-    if (playButton) {
-        playButton.classList.remove("menu-button--active");
-    }
-
+    hideEndScreen();
+    updateStartScreenVisibility(options.returnToMenu);
+    resetPlayButtonState();
     updateShopUi();
     updateOrientationOverlay();
+}
+
+/**
+ * Hides the end screen overlay.
+ */
+function hideEndScreen() {
+    if (!endScreen) return;
+    endScreen.classList.add("hidden");
+    endScreen.setAttribute("aria-hidden", "true");
+}
+
+/**
+ * Updates start screen visibility state.
+ * @param {boolean} returnToMenu Whether menu should be visible.
+ */
+function updateStartScreenVisibility(returnToMenu) {
+    if (!startScreen) return;
+    startScreen.classList.toggle("hidden", !returnToMenu);
+}
+
+/**
+ * Resets the visual active state of the play button.
+ */
+function resetPlayButtonState() {
+    if (!playButton) return;
+    playButton.classList.remove("menu-button--active");
 }

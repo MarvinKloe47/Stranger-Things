@@ -49,26 +49,68 @@ function init() {
  */
 function cacheDomElements() {
     canvas = document.querySelector("canvas");
+    cachePrimaryMenuDom();
+    cacheOverlayDom();
+    cacheMobileDom();
+    cacheEndScreenDom();
+    cacheShopDom();
+    cacheExtendedDomElements();
+}
+
+/**
+ * Caches primary main-menu buttons.
+ */
+function cachePrimaryMenuDom() {
     startScreen = document.getElementById("start-screen");
     playButton = document.getElementById("play-button");
     shopButton = document.getElementById("shop-button");
     musicButton = document.getElementById("music-button");
     musicButtonIcon = document.getElementById("music-button-icon");
+}
+
+/**
+ * Caches overlay and modal elements.
+ */
+function cacheOverlayDom() {
     infoModal = document.getElementById("info-modal");
     controlsModal = document.getElementById("controls-modal");
     shopModal = document.getElementById("shop-modal");
     imprintModal = document.getElementById("imprint-modal");
     rotateOverlay = document.getElementById("rotate-overlay");
+}
+
+/**
+ * Caches mobile control elements.
+ */
+function cacheMobileDom() {
     mobileControls = document.getElementById("mobile-controls");
     mobileJoystick = document.getElementById("mobile-joystick");
     mobileJoystickNub = document.getElementById("mobile-joystick-nub");
+}
+
+/**
+ * Caches end-screen action elements.
+ */
+function cacheEndScreenDom() {
     endScreen = document.getElementById("end-screen");
     endScreenImage = document.getElementById("end-screen-image");
     restartButton = document.getElementById("restart-button");
     menuButton = document.getElementById("menu-button");
+}
+
+/**
+ * Caches shop-specific UI references.
+ */
+function cacheShopDom() {
     buySpecialButton = document.getElementById("buy-special-button");
     shopCoinsValue = document.getElementById("shop-coins-value");
     shopSpecialMessage = document.getElementById("shop-special-message");
+}
+
+/**
+ * Caches remaining less-frequently used DOM references.
+ */
+function cacheExtendedDomElements() {
     shopUnlockedBanner = document.getElementById("shop-unlocked-banner");
 }
 
@@ -163,19 +205,20 @@ function updateOrientationOverlay() {
  * @param {boolean} isActive The new active state.
  */
 function setControlState(control, isActive) {
-    const controlMap = {
-        left: "LEFT",
-        right: "RIGHT",
-        jump: "SPACE",
-        attack: "D",
-        special: "S",
-    };
-    const key = controlMap[control];
+    const key = getControlKey(control);
     if (!key) return;
     keyboard[key] = isActive;
-    if (control === "special" && isActive) {
-        world?.triggerSpecialAttack?.();
-    }
+    if (control === "special" && isActive) world?.triggerSpecialAttack?.();
+}
+
+/**
+ * Resolves one mobile control identifier to keyboard state key.
+ * @param {string} control Mobile control id.
+ * @returns {string|undefined} Keyboard state key.
+ */
+function getControlKey(control) {
+    const controlMap = { left: "LEFT", right: "RIGHT", jump: "SPACE", attack: "D", special: "S" };
+    return controlMap[control];
 }
 
 /**
@@ -199,17 +242,32 @@ function resetJoystick() {
 function updateJoystickPosition(clientX, clientY) {
     if (!mobileJoystick || !mobileJoystickNub) return;
     const rect = mobileJoystick.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const deltaX = clientX - centerX;
-    const deltaY = clientY - centerY;
-    const maxDistance = rect.width * 0.28;
-    const distance = Math.hypot(deltaX, deltaY);
-    const angle = Math.atan2(deltaY, deltaX);
-    const clampedDistance = Math.min(distance, maxDistance);
-    const knobX = Math.cos(angle) * clampedDistance;
-    const knobY = Math.sin(angle) * clampedDistance;
+    const vector = getJoystickVector(rect, clientX, clientY);
+    applyJoystickVector(vector.knobX, vector.knobY);
+}
 
+/**
+ * Computes a clamped joystick vector for the current pointer position.
+ * @param {DOMRect} rect Joystick bounds.
+ * @param {number} clientX Pointer x.
+ * @param {number} clientY Pointer y.
+ * @returns {{knobX:number,knobY:number}} Clamped joystick vector.
+ */
+function getJoystickVector(rect, clientX, clientY) {
+    const deltaX = clientX - (rect.left + rect.width / 2);
+    const deltaY = clientY - (rect.top + rect.height / 2);
+    const maxDistance = rect.width * 0.28;
+    const clamped = Math.min(Math.hypot(deltaX, deltaY), maxDistance);
+    const angle = Math.atan2(deltaY, deltaX);
+    return { knobX: Math.cos(angle) * clamped, knobY: Math.sin(angle) * clamped };
+}
+
+/**
+ * Applies joystick movement vector to visuals and keyboard state.
+ * @param {number} knobX Horizontal vector.
+ * @param {number} knobY Vertical vector.
+ */
+function applyJoystickVector(knobX, knobY) {
     mobileJoystickNub.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
     keyboard.LEFT = knobX < -14;
     keyboard.RIGHT = knobX > 14;
@@ -255,29 +313,51 @@ function bindMobileControls() {
  */
 function bindJoystickEvents() {
     if (!mobileJoystick) return;
+    mobileJoystick.addEventListener("pointerdown", handleJoystickPointerDown);
+    mobileJoystick.addEventListener("pointermove", handleJoystickPointerMove);
+    bindJoystickReleaseEvents();
+}
 
-    mobileJoystick.addEventListener("pointerdown", (event) => {
-        event.preventDefault();
-        if (isPortraitMobile()) return;
-        activeJoystickPointerId = event.pointerId;
-        mobileJoystick.setPointerCapture?.(event.pointerId);
-        updateJoystickPosition(event.clientX, event.clientY);
-    });
+/**
+ * Handles joystick pointer-down input.
+ * @param {PointerEvent} event Pointer event.
+ */
+function handleJoystickPointerDown(event) {
+    event.preventDefault();
+    if (isPortraitMobile()) return;
+    activeJoystickPointerId = event.pointerId;
+    mobileJoystick.setPointerCapture?.(event.pointerId);
+    updateJoystickPosition(event.clientX, event.clientY);
+}
 
-    mobileJoystick.addEventListener("pointermove", (event) => {
-        if (event.pointerId !== activeJoystickPointerId) return;
-        event.preventDefault();
-        updateJoystickPosition(event.clientX, event.clientY);
-    });
+/**
+ * Handles joystick pointer-move input.
+ * @param {PointerEvent} event Pointer event.
+ */
+function handleJoystickPointerMove(event) {
+    if (event.pointerId !== activeJoystickPointerId) return;
+    event.preventDefault();
+    updateJoystickPosition(event.clientX, event.clientY);
+}
 
+/**
+ * Binds pointer release/cancel events for joystick control.
+ */
+function bindJoystickReleaseEvents() {
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((eventName) => {
-        mobileJoystick.addEventListener(eventName, (event) => {
-            if (event.pointerId !== activeJoystickPointerId) return;
-            event.preventDefault();
-            activeJoystickPointerId = null;
-            resetJoystick();
-        });
+        mobileJoystick.addEventListener(eventName, handleJoystickPointerRelease);
     });
+}
+
+/**
+ * Handles joystick pointer release and resets movement.
+ * @param {PointerEvent} event Pointer event.
+ */
+function handleJoystickPointerRelease(event) {
+    if (event.pointerId !== activeJoystickPointerId) return;
+    event.preventDefault();
+    activeJoystickPointerId = null;
+    resetJoystick();
 }
 
 /**
@@ -287,19 +367,33 @@ function bindActionButtonEvents() {
     mobileControls.querySelectorAll("[data-mobile-control]").forEach((button) => {
         const control = button.getAttribute("data-mobile-control");
         if (!control) return;
+        bindActionButtonPress(button, control);
+        bindActionButtonRelease(button, control);
+    });
+}
 
-        button.addEventListener("pointerdown", (event) => {
+/**
+ * Binds pointer-down behavior for one action button.
+ * @param {HTMLElement} button Action button element.
+ * @param {string} control Control id.
+ */
+function bindActionButtonPress(button, control) {
+    button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        if (!isPortraitMobile()) setControlState(control, true);
+    });
+}
+
+/**
+ * Binds pointer release behavior for one action button.
+ * @param {HTMLElement} button Action button element.
+ * @param {string} control Control id.
+ */
+function bindActionButtonRelease(button, control) {
+    ["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
+        button.addEventListener(eventName, (event) => {
             event.preventDefault();
-            if (!isPortraitMobile()) {
-                setControlState(control, true);
-            }
-        });
-
-        ["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
-            button.addEventListener(eventName, (event) => {
-                event.preventDefault();
-                setControlState(control, false);
-            });
+            setControlState(control, false);
         });
     });
 }
@@ -359,19 +453,18 @@ function toggleDebugMode(event) {
  * @param {boolean} isActive The new key state.
  */
 function applyKeyboardInput(code, isActive) {
-    const keyMap = {
-        ArrowRight: "RIGHT",
-        ArrowLeft: "LEFT",
-        ArrowDown: "DOWN",
-        Space: "SPACE",
-        KeyD: "D",
-        KeyS: "S",
-    };
-    const key = keyMap[code];
+    const key = getKeyboardStateKey(code);
     if (!key) return;
     keyboard[key] = isActive;
+    if (code === "KeyS" && isActive) world?.triggerSpecialAttack?.();
+}
 
-    if (code === "KeyS" && isActive) {
-        world?.triggerSpecialAttack?.();
-    }
+/**
+ * Maps browser keyboard codes to game keyboard-state keys.
+ * @param {string} code Browser keyboard code.
+ * @returns {string|undefined} Matching keyboard-state key.
+ */
+function getKeyboardStateKey(code) {
+    const keyMap = { ArrowRight: "RIGHT", ArrowLeft: "LEFT", ArrowDown: "DOWN", Space: "SPACE", KeyD: "D", KeyS: "S" };
+    return keyMap[code];
 }

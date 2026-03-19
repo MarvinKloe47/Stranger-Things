@@ -26,17 +26,22 @@ function generateEnemySpawns(count, minX, maxX, minDistance) {
     let attempts = 0;
 
     while (positions.length < count && attempts < 500) {
-        const x = randomInt(minX, maxX);
-        const isFarEnough = positions.every((position) => Math.abs(position - x) >= minDistance);
-
-        if (isFarEnough) {
-            positions.push(x);
-        }
-
+        tryInsertSpawnPosition(positions, randomInt(minX, maxX), minDistance);
         attempts++;
     }
 
     return positions.sort((a, b) => a - b);
+}
+
+/**
+ * Inserts one spawn position when it satisfies min-distance constraints.
+ * @param {number[]} positions Existing position list.
+ * @param {number} x Candidate position.
+ * @param {number} minDistance Minimum required distance.
+ */
+function tryInsertSpawnPosition(positions, x, minDistance) {
+    const isFarEnough = positions.every((position) => Math.abs(position - x) >= minDistance);
+    if (isFarEnough) positions.push(x);
 }
 
 /**
@@ -63,7 +68,23 @@ function createRandomEnemies() {
  * @returns {BackgroundObject[]} The background object list.
  */
 function createBackgroundObjects(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIEWPORT_HEIGHT) {
-    const brightLayers = [
+    const brightLayers = getBrightLayerDefinitions();
+    const backgroundRepeats = Math.ceil(LEVEL_END_X / worldWidth) + 1;
+    const backgroundObjects = [];
+
+    for (let i = -1; i <= backgroundRepeats; i++) {
+        appendBackgroundLayerSet(backgroundObjects, brightLayers, i * worldWidth, worldWidth, worldHeight);
+    }
+
+    return backgroundObjects;
+}
+
+/**
+ * Returns static bright background layer definitions.
+ * @returns {{path:string,y:number}[]} Bright layer descriptors.
+ */
+function getBrightLayerDefinitions() {
+    return [
         { path: "assets/img/5_background/bright/Sky.png", y: 0 },
         { path: "assets/img/5_background/bright/City2.png", y: 0 },
         { path: "assets/img/5_background/bright/back.png", y: 0 },
@@ -72,19 +93,20 @@ function createBackgroundObjects(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight 
         { path: "assets/img/5_background/bright/minishop&callbox.png", y: 0 },
         { path: "assets/img/5_background/bright/road&lamps.png", y: 0 },
     ];
-    const backgroundRepeats = Math.ceil(LEVEL_END_X / worldWidth) + 1;
-    const backgroundObjects = [];
+}
 
-    for (let i = -1; i <= backgroundRepeats; i++) {
-        const x = i * worldWidth;
-        brightLayers.forEach((layer) => {
-            backgroundObjects.push(
-                new BackgroundObject(layer.path, x, layer.y, worldWidth, worldHeight)
-            );
-        });
-    }
-
-    return backgroundObjects;
+/**
+ * Appends one repeated background layer set at a given x offset.
+ * @param {BackgroundObject[]} backgroundObjects Target list.
+ * @param {{path:string,y:number}[]} layers Layer definitions.
+ * @param {number} x X offset for this repetition.
+ * @param {number} width Layer width.
+ * @param {number} height Layer height.
+ */
+function appendBackgroundLayerSet(backgroundObjects, layers, x, width, height) {
+    layers.forEach((layer) => {
+        backgroundObjects.push(new BackgroundObject(layer.path, x, layer.y, width, height));
+    });
 }
 
 /**
@@ -109,25 +131,25 @@ function createClouds() {
  * @returns {Level} The configured level instance.
  */
 function createLevel1(worldWidth = LEVEL_VIEWPORT_WIDTH, worldHeight = LEVEL_VIEWPORT_HEIGHT) {
+    const coins = createLevelCoins();
     return new Level(
         createRandomEnemies(),
         createClouds(),
         createBackgroundObjects(worldWidth, worldHeight),
-        [
-            new Coin(260, 320),
-            new Coin(430, 180),
-            new Coin(620, 320),
-            new Coin(860, 170),
-            new Coin(1100, 320),
-            new Coin(1380, 190),
-            new Coin(1650, 320),
-            new Coin(1900, 170),
-            new Coin(2180, 320),
-            new Coin(2460, 185),
-            new Coin(2740, 320),
-            new Coin(3010, 165),
-        ],
+        coins,
         LEVEL_END_X
     );
+}
+
+/**
+ * Creates all static coin placements for level one.
+ * @returns {Coin[]} Coin list.
+ */
+function createLevelCoins() {
+    return [
+        new Coin(260, 320), new Coin(430, 180), new Coin(620, 320), new Coin(860, 170),
+        new Coin(1100, 320), new Coin(1380, 190), new Coin(1650, 320), new Coin(1900, 170),
+        new Coin(2180, 320), new Coin(2460, 185), new Coin(2740, 320), new Coin(3010, 165),
+    ];
 }
 

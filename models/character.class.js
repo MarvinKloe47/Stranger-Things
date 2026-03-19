@@ -246,6 +246,11 @@ class Character extends MovableObjects {
         this.startAttack();
     }
 
+    /**
+     * Starts a new melee attack if the character is allowed to attack.
+     * Initializes the full combat state for one attack lifecycle.
+     * @returns {boolean} True when the attack was started.
+     */
     startAttack() {
         if (!this.canStartAttack()) return false;
 
@@ -260,10 +265,18 @@ class Character extends MovableObjects {
         return true;
     }
 
+    /**
+     * Checks whether a new attack can be started.
+     * @returns {boolean} True if dead/state/cooldown checks pass.
+     */
     canStartAttack() {
         return !this.isDead && !this.isAttacking && this.canAttack();
     }
 
+    /**
+     * Advances the attack lifecycle based on elapsed time.
+     * Handles clean reset when the character dies or the attack duration ends.
+     */
     updateAttackState() {
         if (!this.isAttacking) return;
 
@@ -278,18 +291,30 @@ class Character extends MovableObjects {
         }
     }
 
+    /**
+     * Returns whether the current attack is inside its active damage window.
+     * @returns {boolean} True while the hit window is active.
+     */
     isInAttackHitWindow() {
         if (!this.isAttacking) return false;
         const elapsed = Date.now() - this.attackStartTime;
         return elapsed >= this.attackHitWindowStart && elapsed <= this.attackHitWindowEnd;
     }
 
+    /**
+     * Emits a one-time sound signal during the active hit window.
+     * The method does not play audio itself; it only exposes the signal.
+     * @returns {boolean} True exactly once per attack in the hit window.
+     */
     shouldPlayAttackSound() {
         if (this.attackSoundPlayed || !this.isInAttackHitWindow()) return false;
         this.attackSoundPlayed = true;
         return true;
     }
 
+    /**
+     * Resets all transient attack state fields.
+     */
     resetAttackState() {
         this.isAttacking = false;
         this.attackStartTime = 0;
@@ -297,10 +322,19 @@ class Character extends MovableObjects {
         this.attackedTargetsInCurrentAttack.clear();
     }
 
+    /**
+     * Checks whether a target was already hit in the current attack lifecycle.
+     * @param {Object} target The collision target reference.
+     * @returns {boolean} True if the target has already been hit.
+     */
     hasHitTargetInCurrentAttack(target) {
         return this.attackedTargetsInCurrentAttack.has(target);
     }
 
+    /**
+     * Marks a target as hit for the current attack lifecycle.
+     * @param {Object} target The collision target reference.
+     */
     markTargetHitInCurrentAttack(target) {
         this.attackedTargetsInCurrentAttack.add(target);
     }

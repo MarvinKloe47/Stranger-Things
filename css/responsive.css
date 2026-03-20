@@ -277,3 +277,11 @@
 	}
 }
 
+@media (max-width: 680px) and (max-height: 340px)
+{
+	.end-screen__buttons
+	{
+		margin-top: -60px;
+	}
+}
+

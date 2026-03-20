@@ -8,23 +8,26 @@ class AudioManager {
      * @param {string} loopPath Path to the looping background track.
      */
     constructor(loopPath) {
-        this.backgroundLoop = new Audio(loopPath);
-        this.jumpSound = new Audio("assets/audio/jump.mp3");
-        this.hurtSound = new Audio("assets/audio/hurt.mp3");
-        this.collectSound = new Audio("assets/audio/Collect_sound.wav");
-        this.attackSound = new Audio("assets/audio/Karateka_attack.wav");
-        this.laserSound = new Audio("assets/audio/laser_sound.wav");
-        this.evilLaughSound = new Audio("assets/audio/evil-laugh.mp3");
-        this.backgroundLoop.loop = true;
-        this.backgroundLoop.volume = 0.35;
-        this.jumpSound.volume = 0.45;
-        this.hurtSound.volume = 0.5;
-        this.collectSound.volume = 0.45;
-        this.attackSound.volume = 0.45;
-        this.laserSound.volume = 0.5;
-        this.evilLaughSound.volume = 0.6;
+        this.createAudio(loopPath);
+        this.configureVolumes();
         this.isMuted = this.loadMutedPreference();
         this.applyMuteState();
+    }
+
+    createAudio(loopPath) {
+        this.backgroundLoop = new Audio(loopPath);
+        this.backgroundLoop.loop = true;
+        const effectPaths = { jumpSound: "assets/audio/jump.mp3", hurtSound: "assets/audio/hurt.mp3", collectSound: "assets/audio/Collect_sound.wav", attackSound: "assets/audio/Karateka_attack.wav", laserSound: "assets/audio/laser_sound.wav", evilLaughSound: "assets/audio/evil-laugh.mp3" };
+        Object.entries(effectPaths).forEach(([key, path]) => {
+            this[key] = new Audio(path);
+        });
+    }
+
+    configureVolumes() {
+        const volumes = { backgroundLoop: 0.35, jumpSound: 0.45, hurtSound: 0.5, collectSound: 0.45, attackSound: 0.45, laserSound: 0.5, evilLaughSound: 0.6 };
+        Object.entries(volumes).forEach(([key, value]) => {
+            this[key].volume = value;
+        });
     }
 
     /**

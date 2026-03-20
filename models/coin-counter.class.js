@@ -34,10 +34,22 @@ class CoinCounter extends DrawableObject {
      */
     draw(ctx) {
         super.draw(ctx);
+        const { textX, textY } = this.getTextPosition();
+        this.drawValue(ctx, textX, textY);
+    }
 
-        const textX = this.x + this.width / 2 + this.textOffsetX;
-        const textY = this.y + this.height / 2 + this.textOffsetY;
+    getTextPosition() {
+        return { textX: this.x + this.width / 2 + this.textOffsetX, textY: this.y + this.height / 2 + this.textOffsetY };
+    }
 
+    drawValue(ctx, textX, textY) {
+        this.applyTextStyle(ctx);
+        ctx.strokeText(`${this.value}`, textX, textY);
+        ctx.fillText(`${this.value}`, textX, textY);
+        ctx.restore();
+    }
+
+    applyTextStyle(ctx) {
         ctx.save();
         ctx.fillStyle = "white";
         ctx.strokeStyle = "rgba(0, 0, 0, 0.75)";
@@ -45,8 +57,5 @@ class CoinCounter extends DrawableObject {
         ctx.font = "bold 25px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.strokeText(`${this.value}`, textX, textY);
-        ctx.fillText(`${this.value}`, textX, textY);
-        ctx.restore();
     }
 }

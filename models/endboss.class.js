@@ -170,19 +170,20 @@ class Endboss extends MovableObjects {
      * Starts the sprite animation loop.
      */
     animate() {
-        gameSetInterval(() => {
-            const frames = this.getCurrentFrames();
-            const index = this.currentImageIndex % frames.length;
-            const path = frames[index];
-            this.img = this.imageCache[path];
+        gameSetInterval(() => this.animationTick(), this.animationInterval);
+    }
 
-            if (this.isState('dead')) {
-                this.updateDeadAnimation(frames.length);
-                return;
-            }
+    animationTick() {
+        const frames = this.getCurrentFrames();
+        this.setFrameImage(frames);
+        if (this.isState('dead')) return this.updateDeadAnimation(frames.length);
+        this.currentImageIndex++;
+    }
 
-            this.currentImageIndex++;
-        }, this.animationInterval);
+    setFrameImage(frames) {
+        const index = this.currentImageIndex % frames.length;
+        const path = frames[index];
+        this.img = this.imageCache[path];
     }
 
     /**
@@ -206,19 +207,22 @@ class Endboss extends MovableObjects {
      */
     draw(ctx) {
         if (!this.img) return;
+        const flipped = this.applyMirrorTransform(ctx);
+        this.renderFrame(ctx);
+        if (flipped) ctx.restore();
+    }
 
-        if (this.otherDirection) {
-            ctx.save();
-            ctx.translate(this.x + this.width / 2, 0);
-            ctx.scale(-1, 1);
-            ctx.translate(-this.x - this.width / 2, 0);
-        }
+    applyMirrorTransform(ctx) {
+        if (!this.otherDirection) return false;
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-this.x - this.width / 2, 0);
+        return true;
+    }
 
+    renderFrame(ctx) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-
-        if (this.otherDirection) {
-            ctx.restore();
-        }
     }
 
     /**
@@ -226,21 +230,12 @@ class Endboss extends MovableObjects {
      * @returns {string[]} Frame path list.
      */
     getCurrentFrames() {
-        switch (this.state) {
-            case 'dead':
-                return this.IMAGES_DEAD;
-            case 'hurt':
-                return this.IMAGES_HURT;
-            case 'attack':
-                return this.IMAGES_ATTACK;
-            case 'awakening':
-                return this.IMAGES_IDLE;
-            case 'run':
-                return this.IMAGES_RUN;
-            case 'idle':
-            default:
-                return this.IMAGES_IDLE;
-        }
+        const frames = this.frameMap();
+        return frames[this.state] || this.IMAGES_IDLE;
+    }
+
+    frameMap() {
+        return { dead: this.IMAGES_DEAD, hurt: this.IMAGES_HURT, attack: this.IMAGES_ATTACK, awakening: this.IMAGES_IDLE, run: this.IMAGES_RUN, idle: this.IMAGES_IDLE };
     }
 
     /**

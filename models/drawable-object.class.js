@@ -50,19 +50,22 @@ class DrawableObject {
      */
     draw(ctx) {
         if (!this.img) return;
+        const flipped = this.applyMirrorTransform(ctx);
+        this.renderImage(ctx);
+        if (flipped) ctx.restore();
+    }
 
-        if (this.otherDirection) {
-            ctx.save();
-            ctx.translate(this.x + this.width / 2, 0);
-            ctx.scale(-1, 1);
-            ctx.translate(-this.x - this.width / 2, 0);
-        }
+    applyMirrorTransform(ctx) {
+        if (!this.otherDirection) return false;
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-this.x - this.width / 2, 0);
+        return true;
+    }
 
+    renderImage(ctx) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-
-        if (this.otherDirection) {
-            ctx.restore();
-        }
     }
 
     /**
@@ -70,15 +73,15 @@ class DrawableObject {
      * @param {CanvasRenderingContext2D} ctx Render context.
      */
     drawDebugRect(ctx) {
-        if (!DrawableObject.debugMode) return;
+        if (!DrawableObject.debugMode || !this.hasCollisionBox()) return;
+        this.drawCollisionBox(ctx);
+    }
 
-        const hasCollisionBox =
-            typeof this.offset !== "undefined" &&
-            typeof this.width !== "undefined" &&
-            typeof this.height !== "undefined";
+    hasCollisionBox() {
+        return typeof this.offset !== "undefined" && typeof this.width !== "undefined" && typeof this.height !== "undefined";
+    }
 
-        if (!hasCollisionBox) return;
-
+    drawCollisionBox(ctx) {
         ctx.beginPath();
         ctx.lineWidth = "3";
         ctx.strokeStyle = "blue";

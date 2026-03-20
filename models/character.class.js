@@ -66,6 +66,9 @@ class Character extends MovableObjects {
         this.animate();
     }
 
+/**
+* Handles setupSprites.
+ */
     setupSprites() {
         this.loadImage(this.SPRITE_WALK);
         this.loadImages([
@@ -77,6 +80,9 @@ class Character extends MovableObjects {
         ]);
     }
 
+/**
+* Handles setupDimensions.
+ */
     setupDimensions() {
         this.setSize(130, 220);
     }
@@ -114,14 +120,23 @@ class Character extends MovableObjects {
         this.startAnimationLoop();
     }
 
+/**
+* Handles startMovementLoop.
+ */
     startMovementLoop() {
         gameSetInterval(() => this.handleMovementTick(), 1000 / 30);
     }
 
+/**
+* Handles startAnimationLoop.
+ */
     startAnimationLoop() {
         gameSetInterval(() => this.handleAnimationTick(), this.frameInterval);
     }
 
+/**
+* Handles handleMovementTick.
+ */
     handleMovementTick() {
         if (this.isDead) return this.handleDeadMovementTick();
         this.applyHorizontalInput();
@@ -132,50 +147,83 @@ class Character extends MovableObjects {
         this.updateCamera();
     }
 
+/**
+* Handles handleDeadMovementTick.
+ */
     handleDeadMovementTick() {
         this.updateAttackState();
         this.updateCamera();
     }
 
+/**
+* Handles applyHorizontalInput.
+ */
     applyHorizontalInput() {
         if (this.canMoveRight()) return this.moveRight();
         if (this.canMoveLeft()) this.moveLeft();
     }
 
+/**
+* Handles canMoveRight.
+ */
     canMoveRight() {
         return this.world?.keyboard?.RIGHT && this.x < (this.world?.level?.level_end_x ?? Infinity);
     }
 
+/**
+* Handles canMoveLeft.
+ */
     canMoveLeft() {
         return this.world?.keyboard?.LEFT && this.x > 0;
     }
 
+/**
+* Handles moveRight.
+ */
     moveRight() {
         this.x += this.speed;
         this.otherDirection = false;
     }
 
+/**
+* Handles moveLeft.
+ */
     moveLeft() {
         this.x -= this.speed;
         this.otherDirection = true;
     }
 
+/**
+* Handles applyJumpInput.
+ */
     applyJumpInput() {
         if (this.world?.keyboard?.SPACE && !this.isAboveGround()) this.jump();
     }
 
+/**
+* Handles applyAttackInput.
+ */
     applyAttackInput() {
         if (this.world?.keyboard?.D) this.startAttack();
     }
 
+/**
+* Handles playAttackSoundIfNeeded.
+ */
     playAttackSoundIfNeeded() {
         if (this.shouldPlayAttackSound()) this.world?.audioManager?.playAttackSound();
     }
 
+/**
+* Handles updateCamera.
+ */
     updateCamera() {
         this.world.camera_x = -this.x;
     }
 
+/**
+* Handles handleAnimationTick.
+ */
     handleAnimationTick() {
         const isMoving = this.isMovingHorizontally();
         const isJumping = this.isJumpingNow();
@@ -186,14 +234,23 @@ class Character extends MovableObjects {
         this.updateWalkAnimationFrame(isMoving);
     }
 
+/**
+* Handles isMovingHorizontally.
+ */
     isMovingHorizontally() {
         return this.world?.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT);
     }
 
+/**
+* Handles isJumpingNow.
+ */
     isJumpingNow() {
         return this.isAboveGround() || this.speedY > 0;
     }
 
+/**
+* Handles updateDeadAnimationFrame.
+ */
     updateDeadAnimationFrame() {
         this.activateDeadAnimation();
         if (this.deadAnimationFinished) return;
@@ -204,26 +261,42 @@ class Character extends MovableObjects {
         this.deadAnimationFinished = true;
     }
 
+/**
+* Handles updateAttackAnimationFrame.
+ */
     updateAttackAnimationFrame() {
         this.activateAttackAnimation();
         this.advanceFrame();
     }
 
+/**
+* Handles updateHurtAnimationFrame.
+ */
     updateHurtAnimationFrame() {
         this.activateHurtAnimation();
         this.advanceFrame();
     }
 
+/**
+* Handles updateJumpAnimationFrame.
+ */
     updateJumpAnimationFrame() {
         this.activateJumpAnimation();
         this.advanceFrame();
     }
 
+/**
+* Handles updateWalkAnimationFrame.
+ * @param {*} isMoving
+ */
     updateWalkAnimationFrame(isMoving) {
         this.activateWalkAnimation();
         this.currentFrame = isMoving ? (this.currentFrame + 1) % this.frameCount : 0;
     }
 
+/**
+* Handles advanceFrame.
+ */
     advanceFrame() {
         this.currentFrame = (this.currentFrame + 1) % this.frameCount;
     }
@@ -295,10 +368,16 @@ class Character extends MovableObjects {
         this.drawFrame(ctx, metrics);
     }
 
+/**
+* Handles canDraw.
+ */
     canDraw() {
         return this.img && this.img.complete && this.img.naturalWidth !== 0;
     }
 
+/**
+* Handles getFrameMetrics.
+ */
     getFrameMetrics() {
         const frameWidth = this.img.width / this.frameCount;
         const frameHeight = this.img.height;
@@ -306,6 +385,11 @@ class Character extends MovableObjects {
         return { frameWidth, frameHeight };
     }
 
+/**
+* Handles drawFrame.
+ * @param {*} ctx
+ * @param {*} metrics
+ */
     drawFrame(ctx, metrics) {
         ctx.save();
         if (this.otherDirection) this.drawMirroredFrame(ctx, metrics);
@@ -313,16 +397,33 @@ class Character extends MovableObjects {
         ctx.restore();
     }
 
+/**
+* Handles drawMirroredFrame.
+ * @param {*} ctx
+ * @param {*} metrics
+ */
     drawMirroredFrame(ctx, metrics) {
         ctx.translate(this.x + this.width, this.y);
         ctx.scale(-1, 1);
         this.drawImageFrame(ctx, metrics, 0, 0);
     }
 
+/**
+* Handles drawNormalFrame.
+ * @param {*} ctx
+ * @param {*} metrics
+ */
     drawNormalFrame(ctx, metrics) {
         this.drawImageFrame(ctx, metrics, this.x, this.y);
     }
 
+/**
+* Handles drawImageFrame.
+ * @param {*} ctx
+ * @param {*} metrics
+ * @param {*} dx
+ * @param {*} dy
+ */
     drawImageFrame(ctx, metrics, dx, dy) {
         ctx.drawImage(
             this.img,

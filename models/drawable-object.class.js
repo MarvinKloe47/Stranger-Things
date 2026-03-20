@@ -55,6 +55,10 @@ class DrawableObject {
         if (flipped) ctx.restore();
     }
 
+/**
+* Handles applyMirrorTransform.
+ * @param {*} ctx
+ */
     applyMirrorTransform(ctx) {
         if (!this.otherDirection) return false;
         ctx.save();
@@ -64,6 +68,10 @@ class DrawableObject {
         return true;
     }
 
+/**
+* Handles renderImage.
+ * @param {*} ctx
+ */
     renderImage(ctx) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
@@ -77,10 +85,27 @@ class DrawableObject {
         this.drawCollisionBox(ctx);
     }
 
+/**
+ * Checks whether the object has a valid collision box definition.
+ *
+ * A collision box is considered valid if `offset`, `width`, and `height`
+ * are defined on the instance.
+ *
+ * @returns {boolean} True if a collision box can be calculated, otherwise false.
+ */
     hasCollisionBox() {
         return typeof this.offset !== "undefined" && typeof this.width !== "undefined" && typeof this.height !== "undefined";
     }
 
+/**
+ * Draws the collision box of the object onto a canvas context.
+ *
+ * The collision box is calculated using the object's position (`x`, `y`),
+ * its dimensions (`width`, `height`), and its `offset` values.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The canvas rendering context used for drawing.
+ * @throws {Error} If required properties (offset, width, height) are missing.
+ */
     drawCollisionBox(ctx) {
         ctx.beginPath();
         ctx.lineWidth = "3";

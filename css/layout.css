@@ -92,12 +92,14 @@
 
 .end-screen
 {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	z-index: 30;
+	border-radius: 12px;
+	overflow: hidden;
 }
 
 .end-screen.hidden

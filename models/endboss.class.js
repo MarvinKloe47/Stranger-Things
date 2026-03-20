@@ -173,6 +173,9 @@ class Endboss extends MovableObjects {
         gameSetInterval(() => this.animationTick(), this.animationInterval);
     }
 
+/**
+* Handles animationTick.
+ */
     animationTick() {
         const frames = this.getCurrentFrames();
         this.setFrameImage(frames);
@@ -180,6 +183,10 @@ class Endboss extends MovableObjects {
         this.currentImageIndex++;
     }
 
+/**
+* Handles setFrameImage.
+ * @param {*} frames
+ */
     setFrameImage(frames) {
         const index = this.currentImageIndex % frames.length;
         const path = frames[index];
@@ -212,6 +219,10 @@ class Endboss extends MovableObjects {
         if (flipped) ctx.restore();
     }
 
+/**
+* Handles applyMirrorTransform.
+ * @param {*} ctx
+ */
     applyMirrorTransform(ctx) {
         if (!this.otherDirection) return false;
         ctx.save();
@@ -221,6 +232,10 @@ class Endboss extends MovableObjects {
         return true;
     }
 
+/**
+* Handles renderFrame.
+ * @param {*} ctx
+ */
     renderFrame(ctx) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
@@ -234,6 +249,9 @@ class Endboss extends MovableObjects {
         return frames[this.state] || this.IMAGES_IDLE;
     }
 
+/**
+* Handles frameMap.
+ */
     frameMap() {
         return { dead: this.IMAGES_DEAD, hurt: this.IMAGES_HURT, attack: this.IMAGES_ATTACK, awakening: this.IMAGES_IDLE, run: this.IMAGES_RUN, idle: this.IMAGES_IDLE };
     }

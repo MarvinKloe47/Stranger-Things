@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Ground enemy with single-hit health and walking animation.
  */
 class Orc extends MovableObjects {

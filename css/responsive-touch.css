@@ -44,6 +44,11 @@
 		box-shadow: none;
 	}
 
+	.end-screen
+	{
+		border-radius: 0;
+	}
+
 	.start-screen,
 	.start-screen__bg
 	{

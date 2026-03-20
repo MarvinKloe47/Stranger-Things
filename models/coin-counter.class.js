@@ -38,10 +38,19 @@ class CoinCounter extends DrawableObject {
         this.drawValue(ctx, textX, textY);
     }
 
+/**
+* Handles getTextPosition.
+ */
     getTextPosition() {
         return { textX: this.x + this.width / 2 + this.textOffsetX, textY: this.y + this.height / 2 + this.textOffsetY };
     }
 
+/**
+* Handles drawValue.
+ * @param {*} ctx
+ * @param {*} textX
+ * @param {*} textY
+ */
     drawValue(ctx, textX, textY) {
         this.applyTextStyle(ctx);
         ctx.strokeText(`${this.value}`, textX, textY);
@@ -49,6 +58,10 @@ class CoinCounter extends DrawableObject {
         ctx.restore();
     }
 
+/**
+* Handles applyTextStyle.
+ * @param {*} ctx
+ */
     applyTextStyle(ctx) {
         ctx.save();
         ctx.fillStyle = "white";

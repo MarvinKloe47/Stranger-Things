@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Ground enemy that walks from right to left and requires multiple hits.
  */
 class Troll extends MovableObjects 

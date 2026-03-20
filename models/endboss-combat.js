@@ -84,33 +84,66 @@ Endboss.prototype.canAttack = function () {
  * Starts one boss attack sequence with recovery phase.
  */
 Endboss.prototype.attack = function () {
-    if (this.isState("attack") || this.isState("dead") || this.isState("awakening") || this.isRecovering) return;
+    if (!this.canStartAttackSequence()) return;
+    this.beginAttackSequence();
+    gameSetTimeout(() => this.finishAttackSequence(), this.attackDuration);
+};
 
+/**
+ * Checks whether the boss can begin an attack sequence now.
+ * @returns {boolean} True when the attack can begin.
+ */
+Endboss.prototype.canStartAttackSequence = function () {
+    return !this.isState("attack") && !this.isState("dead") && !this.isState("awakening") && !this.isRecovering;
+};
+
+/**
+ * Initializes attack state and timers.
+ */
+Endboss.prototype.beginAttackSequence = function () {
     this.setState("attack");
     this.lastAttackTime = Date.now();
     this.attackStartedAt = this.lastAttackTime;
     this.nextAttackAllowedAt = Number.MAX_SAFE_INTEGER;
     this.hasAppliedAttackDamage = false;
+};
 
-    gameSetTimeout(() => {
-        if (this.isState("dead")) return;
+/**
+ * Completes the attack animation and starts recovery.
+ */
+Endboss.prototype.finishAttackSequence = function () {
+    if (this.isState("dead")) return;
+    this.resetAttackToIdle();
+    this.startRecovery();
+};
 
-        if (this.isState("attack")) {
-            this.setState("idle");
-        }
+/**
+ * Resets attack state back to idle when appropriate.
+ */
+Endboss.prototype.resetAttackToIdle = function () {
+    if (this.isState("attack")) {
+        this.setState("idle");
+    }
+};
 
-        this.isRecovering = true;
-        this.nextAttackAllowedAt = Date.now() + this.attackCooldown;
+/**
+ * Starts recovery timer after an attack.
+ */
+Endboss.prototype.startRecovery = function () {
+    this.isRecovering = true;
+    this.nextAttackAllowedAt = Date.now() + this.attackCooldown;
+    gameSetTimeout(() => this.finishRecovery(), this.recoveryDuration);
+};
 
-        gameSetTimeout(() => {
-            if (this.isState("dead")) return;
-            this.isRecovering = false;
-
-            if (!this.isState("hurt") && !this.isState("attack")) {
-                this.setState("idle");
-            }
-        }, this.recoveryDuration);
-    }, this.attackDuration);
+/**
+ * Finishes recovery and returns to idle when allowed.
+ */
+Endboss.prototype.finishRecovery = function () {
+    if (this.isState("dead")) return;
+    this.isRecovering = false;
+    if (!this.isState("hurt") && !this.isState("attack")) {
+        this.setState("idle");
+    }
 };
 
 /**
@@ -155,7 +188,6 @@ Endboss.prototype.getAttackBox = function () {
     const attackX = this.otherDirection
         ? this.x - attackWidth + 28
         : this.x + this.width - 28;
-
     return {
         x: attackX,
         y: attackY,

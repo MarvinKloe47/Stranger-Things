@@ -14,6 +14,10 @@ class AudioManager {
         this.applyMuteState();
     }
 
+/**
+* Handles createAudio.
+ * @param {*} loopPath
+ */
     createAudio(loopPath) {
         this.backgroundLoop = new Audio(loopPath);
         this.backgroundLoop.loop = true;
@@ -23,6 +27,9 @@ class AudioManager {
         });
     }
 
+/**
+* Handles configureVolumes.
+ */
     configureVolumes() {
         const volumes = { backgroundLoop: 0.35, jumpSound: 0.45, hurtSound: 0.5, collectSound: 0.45, attackSound: 0.45, laserSound: 0.5, evilLaughSound: 0.6 };
         Object.entries(volumes).forEach(([key, value]) => {
